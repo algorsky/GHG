@@ -4,12 +4,25 @@ library(lubridate)
 library(neonDissGas)
 library(gridExtra)
 
+## Load the data from Github
 # Read in data 
-setwd("/Users/adriannagorsky/Documents/Research/Gas Data 2020")
-dat = read.csv('dat.csv')
-dat$date = mdy(dat$date)
+prac = read_csv('data/tidy.dat.out.csv')
+prac$date = mdy(prac$date)
 
-dat = read.csv('tempdo.csv')
+gd <- prac %>% 
+  group_by(lake, date, lakedepth) %>% 
+  summarise(
+    CO2 = mean(dissolvedCO2),
+    CH4 = mean(dissolvedCH4)
+  )
+gd$col <- "Jan. 30-31"
+gd$col <- ifelse(gd$date < as.POSIXct("2020-01-30"), "Jan. 9-10", gd$col)
+gd$col <- ifelse(gd$date > as.POSIXct("2020-01-31"), "Feb. 14-15", gd$col)
+gd$col <- ifelse(gd$date > as.POSIXct("2020-02-15"), "March 6-7", gd$col)
+gd$col <- factor(gd$col, c("Jan. 9-10", "Jan. 30-31", "Feb. 14-15", "March 6-7"), ordered = TRUE)
+
+
+dat = read.csv('data/tempdo.csv')
 dat$date = mdy(dat$Date)
 
 dat$col <- "Jan. 30-31"
