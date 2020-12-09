@@ -2,12 +2,10 @@ library(tidyverse)
 library(lubridate)
 library(patchwork)
 
-getwd()
-
 ################## SOUTH SPARKLING BOG ##################
 ################## Chlorophyll Sensor ##################
 # 2019
-chl.2019 = read_csv('SB_2018-2019_underice_chla_import.csv')
+chl.2019 = read_csv('data/SB_2018-2019_underice_chla_import.csv')
 names(chl.2019) = c('Time.s','UTC.Date','CT.Date', 'Bat.V','T.degC','Sensor.ppb','Gain')
 
 chl1 = ggplot(chl.2019) + geom_line(aes(x = CT.Date, y = Sensor.ppb), col = 'lightblue4') +
