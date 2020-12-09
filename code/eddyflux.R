@@ -5,12 +5,24 @@ library(lubridate)
 # Read in data 
 data = read_csv('data/eddypro_SSB_data.csv')
 flux<- data%>%
-  filter(ch4_flux >= 0)
-
+  filter(ch4_flux > -9999)
+flux$date<- as.Date(flux$date, format = "%m/%d/%y")
 
 ggplot(flux)+
-  geom_line(aes(x = DOY, y = ch4_flux))+
-  geom_vline(xintercept = 119,  linetype = "dashed", color = "blue")+
-  xlab("Day of Year")+
+  geom_line(aes(x = date, y = ch4_flux))+
+  geom_vline(xintercept = as.numeric(as.Date("2020-04-28")),  linetype = "dashed", color = "blue")+
+  xlab("")+
   ylab("CH4 Flux (µmol m-2 s-1)")+
+  theme_bw()
+
+#mgC/m2/day
+day<- flux %>%
+  group_by(date) %>%
+  summarize(mean_flux = mean(ch4_flux))
+
+ggplot(day)+
+  geom_line(aes(x = date, y = mean_flux))+
+  geom_vline(xintercept = as.numeric(as.Date("2020-04-28")),  linetype = "dashed", color = "blue")+
+  xlab("")+
+  ylab("CH4 Flux (µmol m-2 d-1)")+
   theme_bw()

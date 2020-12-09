@@ -13,7 +13,7 @@ chl1 = ggplot(chl.2019) + geom_line(aes(x = CT.Date, y = Sensor.ppb), col = 'lig
   labs(title = 'Sparkling Bog 2019') + ylab('Sensor (ppb)') + xlab('Date')
 
 # 2020
-chl.2020 <- list.files(path='CHLA/', full.names = TRUE) %>%
+chl.2020 <- list.files(path='data/CHLA/', full.names = TRUE) %>%
   lapply(read_csv, skip = 2) %>%
   bind_rows %>%
   mutate(CT.Date = as.POSIXct(`Time (sec)`, origin = '1970-01-01'))
