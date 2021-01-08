@@ -2,7 +2,7 @@ library(tidyverse)
 library(devtools)
 library(lubridate)
 
-# Read in data 
+# Read in data for SSB
 data = read_csv('data/eddypro_SSB_data.csv')
 flux<- data%>%
   filter(ch4_flux > -9999)
