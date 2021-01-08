@@ -65,7 +65,7 @@ ggsave('SparklingBogTemp.png',width = 7, height = 5)
 # 2019
 light.list = list()
 for(i in 1:7) {
-  light.list[[i]] = read_csv(list.files(path='2018_2019_underice/Temp/', full.names = TRUE)[i], skip = 1) %>%
+  light.list[[i]] = read_csv(list.files(path='data/Temp 2', full.names = TRUE)[i], skip = 1) %>%
   # read_csv('2018_2019_underice/Temp/SB_1.csv', skip = 1) %>%
   mutate(depth = i)
 }
@@ -83,7 +83,7 @@ light.2019 = light.2019 %>%
 light.list1 = list()
 light.list2 = list()
 for(i in 1:7) {
-  light.list1[[i]] = read_csv(list.files(path='2019_2020_underice/Temp/2MAR2020/' , full.names = TRUE)[i], skip = 1) %>%
+  light.list1[[i]] = read_csv(list.files(path='data/Temp/2MAR2020/' , full.names = TRUE)[i], skip = 1) %>%
     # read_csv('2018_2019_underice/Temp/SB_1.csv', skip = 1) %>%
     mutate(depth = i)
 
