@@ -52,13 +52,22 @@ CH4<-ggplot(dplyr::filter(gd, lake == 'TB' | lake == 'SSB')) +
   theme_bw()+
   theme(legend.position = "none")
 
-
+#Facet_Wrap by Date for Temperature and DO for Trout Bog
 Temp<-ggplot(dplyr::filter(dat, Bog == 'TB' | Bog == 'SSB')) + 
-  geom_point(aes(x = waterTemp, y = Depth, color = col, size = 1.5)) +
-  geom_path(aes(x = waterTemp, y = Depth, color = col))+
-  facet_wrap(~Bog) +
+  geom_point(aes(x = waterTemp, y = Depth)) +
+  geom_path(aes(x = waterTemp, y = Depth))+
+  facet_wrap(~date) +
   scale_y_reverse(name = "Depth (m)") +
-  scale_x_continuous(name = "Water Temperature (C)")+
+  scale_x_continuous(name = "Temperature (C)")+
+  theme_bw()+
+  theme(legend.position = "none")
+#Facet_Wrap by Date for Temperature and DO
+DO<-ggplot(dplyr::filter(dat, Bog == 'TB' | Bog == 'SSB')) + 
+  geom_point(aes(x = waterTemp, y = Depth)) +
+  geom_path(aes(x = waterTemp, y = Depth))+
+  facet_wrap(~date) +
+  scale_y_reverse(name = "Depth (m)") +
+  scale_x_continuous(name = "Temperature (C)")+
   theme_bw()+
   theme(legend.position = "none")
 

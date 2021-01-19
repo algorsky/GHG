@@ -17,3 +17,11 @@ ggplot(dplyr::filter(summer, Bog == 'TB' | Bog == 'SSB')) +
   scale_y_reverse(name = "Depth (m)") +
   scale_x_continuous(name = "Water Temperature (C)")+
   theme_bw()
+
+ggplot(dplyr::filter(summer, Bog == 'TB' | Bog == 'SSB')) + 
+  geom_point(aes(x = DO, y = Depth, color = Date)) +
+  geom_path(aes(x = DO, color = Date, y = Depth))+
+  facet_wrap(~Bog) +
+  scale_y_reverse(name = "Depth (m)") +
+  scale_x_continuous(name = "Water Temperature (C)")+
+  theme_bw()
