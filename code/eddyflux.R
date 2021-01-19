@@ -4,16 +4,29 @@ library(lubridate)
 
 # Read in data for SSB
 data = read_csv('data/eddypro_SSB_data.csv')
-flux<- data%>%
+
+#QC
+qc<- data%>%
   filter(ch4_flux > -9999)
+ggplot(qc, aes(ch4_flux))+
+  geom_histogram(binwidth = 0.01)
+
+qc<- data%>%
+  filter(ch4_flux > -9999)%>%
+  filter(qc_ch4_flux <= 1)
+flux<-qc%>%
+  filter(ch4_flux > -0.15 & ch4_flux < 0.15)
 flux$date<- as.Date(flux$date, format = "%m/%d/%y")
 
 ggplot(flux)+
-  geom_line(aes(x = date, y = ch4_flux))+
-  geom_vline(xintercept = as.numeric(as.Date("2020-04-28")),  linetype = "dashed", color = "blue")+
+  geom_point(aes(x = date, y = ch4_flux), size = 0.05, color = "blue")+
+  geom_vline(xintercept = as.numeric(as.Date("2020-04-28")),  linetype = "dashed", color = "black")+
   xlab("")+
   ylab("CH4 Flux (µmol m-2 s-1)")+
   theme_bw()
+
+#Month
+
 
 #mgC/m2/day
 day<- flux %>%
