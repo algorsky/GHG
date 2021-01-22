@@ -25,8 +25,24 @@ ggplot(flux)+
   ylab("CH4 Flux (µmol m-2 s-1)")+
   theme_bw()
 
-#Month
+#Month of May
+ggplot(flux)+
+  geom_point(aes(x = daytime, y = ch4_flux), size = 0.05, color = "blue")+
+  geom_vline(xintercept = as.numeric(as.Date("2020-04-28")),  linetype = "dashed", color = "black")+
+  xlim(as.Date('2020-05-01'), as.Date('2020-05-31'))+
+  xlab("")+
+  ylab("CH4 Flux (µmol m-2 s-1)")+
+  theme_bw()
 
+#Day variation
+may <- flux%>% 
+  filter(date %in% as.Date('2020-05-02'))
+ggplot(may)+
+  geom_point(aes(x = time, y = ch4_flux), size = 1.5, color = "blue")+
+  #geom_vline(xintercept = as.numeric(as.Date("2020-04-28")),  linetype = "dashed", color = "black")+
+  xlab("Time (2020-05-02)")+
+  ylab("CH4 Flux (µmol m-2 s-1)")+
+  theme_bw()
 
 #mgC/m2/day
 day<- flux %>%
