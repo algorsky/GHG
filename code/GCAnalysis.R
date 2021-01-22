@@ -34,13 +34,15 @@ dat <- df %>%
   mutate(headspaceTemp = 0.2) %>% #degC Assume it is the same was water temp
   mutate(barometricPressure = 103.991) #kpa
 
-dat.out <- def.calc.sdg.conc(as.data.frame(dat)) %>% 
+dat.out <- def.calc.sdg.conc(as.data.frame(dat)) %>%
+  filter(lake == 'TB' | lake == 'SSB')%>%
   select(lake,date,depth,dissolvedCO2,dissolvedCH4) %>% 
   gather(value="value",key="parameter",-lake,-date,-depth)
 
-tidy.dat.out2021 <- def.calc.sdg.conc(as.data.frame(dat)) %>% 
+tidy.dat.out2021 <- def.calc.sdg.conc(as.data.frame(dat)) %>%
+  filter(lake == 'TB' | lake == 'SSB')%>%
   select(lake,date,depth,dissolvedCO2,dissolvedCH4)
 
-write.table(tidy.dat.out, 'data/tidy.dat.out2021.csv', sep="\t")
+write.table(tidy.dat.out2021, 'data/tidy.dat.out2021.csv', sep="\t")
 
 
