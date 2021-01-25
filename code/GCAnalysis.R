@@ -10,7 +10,7 @@ df = read_csv('data/2021Run1/rawdata.csv')  %>%
   mutate(sample_id = str_replace_all(sample_id, pattern = "2020_01_", replacement = "2020-01-")) %>%  #because you switch from underscores to dashes
   separate(col = sample_id, into = c('lake','date','depth','replicate'), sep = "_", remove = FALSE) %>% 
   mutate(date = as.Date(date)) %>% 
-  mutate(analysis_date = mdy_hms(analysis_date)) %>% 
+  #mutate(analysis_date = mdy_hms(analysis_date)) %>% 
   filter(lake == 'TB' | lake == 'SSB') %>% 
   select(-batch_id) %>% 
   pivot_longer(cols = CO2_FID:N2O_ECD,names_to = "parameter",values_to = "value") %>% 
