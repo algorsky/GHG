@@ -4,11 +4,13 @@ library(lubridate)
 library(neonDissGas)
 
 # Read in data 
-df = read_csv('data/2021Run1/rawdata.csv')  %>% 
+df.2021 = read_csv('data/2021Run1/rawdata.csv')  %>% 
   filter(batch_id == 'SSB')%>%
   mutate(sample_id = str_replace_all(sample_id, pattern = "2020_01_", replacement = "2020-01-")) %>%  #because you switch from underscores to dashes
   separate(col = sample_id, into = c('lake','date','depth','replicate'), sep = "_", remove = FALSE) %>% 
   mutate(date = as.Date(date)) 
+
+#write.table(df.2021, 'data/df.2021.csv', sep="\t")
 
 air_samples <- df %>% filter(grepl("Air",depth)) %>% 
   select(-analysis_date,-batch_id,-sample_id,-depth) %>% 
