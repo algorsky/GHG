@@ -67,6 +67,6 @@ tidy.dat.out2021 <- def.calc.sdg.conc(as.data.frame(dat)) %>%
   filter(lake == 'TB' | lake == 'SSB')%>%
   select(lake,date,depth,dissolvedCO2,dissolvedCH4)
 
-write.table(tidy.dat.out2021, 'data/tidy.dat.out2021.csv', sep="\t")
+write.table(tidy.dat.out2021, 'data/GC2021/tidy.dat.out2021.csv', sep="\t")
 
 
