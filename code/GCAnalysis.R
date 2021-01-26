@@ -20,7 +20,7 @@ df = read_csv('data/2021Run1/rawdata.csv')  %>%
   filter(!(parameter == "CO2_TCD" & value <=1000)) %>% 
   mutate(value = round(value,digits=0))
 
-write.table(df, 'data/qaqc.csv', sep="\t")
+#write.table(df, 'data/qaqc.csv', sep="\t")
 
 
 # Read in data 
@@ -31,17 +31,16 @@ df.2021 = read_csv('data/2021Run1/rawdata.csv')  %>%
   mutate(date = as.Date(date)) 
 
 #write.table(df.2021, 'data/df.2021.csv', sep="\t")
-
-air_samples <- df %>% filter(grepl("Air",depth)) %>% 
+air_samples <- df.2021 %>% filter(grepl("Air",depth)) %>% 
   select(-analysis_date,-batch_id,-sample_id,-depth) %>% 
   group_by(lake,date) %>% 
   summarize_all(list(median = median)) %>% 
   select(-CO2_TCD_median,-CH4_TCD_median) %>%  #levels are all to low to use TCD
   ungroup()
 
-dat <- df %>% 
+dat <- df.2021 %>% 
   filter(!grepl("Air",depth)) %>% 
-  select(batch_id,lake, sample_id, date,depth,CO2_FID,CO2_TCD,CH4_FID,CH4_TCD,N2O_ECD) %>% 
+  select(batch_id,sample_id, lake, date,depth,CO2_FID,CO2_TCD,CH4_FID,CH4_TCD,N2O_ECD) %>% 
   mutate(N2O_ECD = replace(N2O_ECD,N2O_ECD < 0, 0)) %>% 
   left_join(air_samples) %>% 
   rename(concentrationCO2Gas = CO2_TCD) %>% 
