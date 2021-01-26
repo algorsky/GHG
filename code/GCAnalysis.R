@@ -24,7 +24,7 @@ df = read_csv('data/2021Run1/rawdata.csv')  %>%
 
 
 # Read in data 
-df.2021 = read_csv('data/2021Run1/rawdata.csv')  %>% 
+df.2021 = read_csv('data/GC2021/2021Run1/rawdata.csv')  %>% 
   filter(batch_id == 'SSB')%>%
   mutate(sample_id = str_replace_all(sample_id, pattern = "2020_01_", replacement = "2020-01-")) %>%  #because you switch from underscores to dashes
   separate(col = sample_id, into = c('lake','date','depth','replicate'), sep = "_", remove = FALSE) %>% 
