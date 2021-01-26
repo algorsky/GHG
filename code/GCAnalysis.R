@@ -55,8 +55,9 @@ dat.2021 <- df.2021 %>%
   mutate(headspaceTemp = 0.2) %>% #degC Assume it is the same was water temp
   mutate(barometricPressure = 103.991) #kpa
 
-write.table(dat.2021, 'data/dat.2021.csv', sep="\t")
+write.table(dat.2021, 'data/GC2021/dat.2021.csv', sep="\t")
 
+dat = read_csv('data/GC2021/dat.2021.csv')
 dat.out <- def.calc.sdg.conc(as.data.frame(dat)) %>%
   filter(lake == 'TB' | lake == 'SSB')%>%
   select(lake,date,depth,dissolvedCO2,dissolvedCH4) %>% 
