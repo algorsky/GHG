@@ -38,7 +38,7 @@ air_samples <- df.2021 %>% filter(grepl("Air",depth)) %>%
   select(-CO2_TCD_median,-CH4_TCD_median) %>%  #levels are all to low to use TCD
   ungroup()
 
-dat <- df.2021 %>% 
+dat.2021 <- df.2021 %>% 
   filter(!grepl("Air",depth)) %>% 
   select(batch_id,sample_id, lake, date,depth,CO2_FID,CO2_TCD,CH4_FID,CH4_TCD,N2O_ECD) %>% 
   mutate(N2O_ECD = replace(N2O_ECD,N2O_ECD < 0, 0)) %>% 
@@ -54,6 +54,8 @@ dat <- df.2021 %>%
   mutate(waterTemp = 0.2) %>% #degC
   mutate(headspaceTemp = 0.2) %>% #degC Assume it is the same was water temp
   mutate(barometricPressure = 103.991) #kpa
+
+write.table(dat.2021, 'data/dat.2021.csv', sep="\t")
 
 dat.out <- def.calc.sdg.conc(as.data.frame(dat)) %>%
   filter(lake == 'TB' | lake == 'SSB')%>%
