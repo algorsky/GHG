@@ -75,6 +75,6 @@ O2<-ggplot(dplyr::filter(tempdo, Bog == 'TB' | Bog == 'SSB')) +
   theme_bw()+
   theme(legend.position = "none")
 
-(CO2 + CH4 + Temp + O2) + plot_layout(guides = "collect", ncol = 2)
+figure<-(CO2 + CH4 + Temp + O2) + plot_layout(guides = "collect", ncol = 2)
 
-hggsave("figure.png", width = 6.5, height = 6, units = 'in', figure)
+ggsave("figure.png", width = 10, height = 6, units = 'in', figure)
