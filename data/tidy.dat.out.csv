@@ -1,4 +1,4 @@
-lake,date,lakedepth,dissolvedCO2,dissolvedCH4
+lake,date,depth,dissolvedCO2,dissolvedCH4
 TB,1/30/20,0.5,0.000612,2.44E-05
 TB,1/30/20,0.5,0.000623,2.63E-05
 TB,1/30/20,0.5,0.000597,2.60E-05
