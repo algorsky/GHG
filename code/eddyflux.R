@@ -20,6 +20,13 @@ fluxSSBCH4<-qcSSBCH4%>%
   filter(ch4_flux > -0.15 & ch4_flux < 0.15)
 fluxSSBCH4$date<- as.Date(fluxSSBCH4$date, format = "%m/%d/%y")
 
+qcSSBCO2<- dataSSB%>%
+  filter(co2_flux > -9999)%>%
+  filter(qc_co2_flux <= 1)
+fluxSSBCO2<-qcSSBCO2%>%
+  filter(co2_flux > -10 & co2_flux < 10)
+fluxSSBCO2$date<- as.Date(fluxSSBCO2$date, format = "%m/%d/%y")
+
 #QC CH4 for TB
 #qcTBCH4<- dataTB%>%
  #filter(ch4_flux > -9999)
@@ -42,9 +49,18 @@ ch4SSB<-ggplot()+
   xlab("")+
   ylab("CH4 Flux (µmol m-2 s-1)")+
   theme_bw()
+
+co2SSB<- ggplot()+
+  geom_point(data = fluxSSBCO2, aes(x = date, y = co2_flux), size = 0.05, color = "blue")+
+  #geom_point(data = fluxTBCH4, aes(x = date, y = ch4_flux), size = 0.05, color = "red")+
+  geom_vline(xintercept = as.numeric(as.Date("2020-04-28")),  linetype = "dashed", color = "black")+
+  geom_hline(yintercept = 0, color = "black", alpha = 0.4)+
+  xlab("")+
+  ylab("CO2 Flux (µmol m-2 s-1)")+
+  theme_bw()
   
 
-tempplot<- ggplot(fluxSSBCH4)+
+tempplot<- ggplot(fluxSSBCO2)+
   geom_path(aes(x = date, y = (air_temperature-273.15)))+
   ylab("Air Temperature (C)")+
   xlab("")+
@@ -52,12 +68,20 @@ tempplot<- ggplot(fluxSSBCH4)+
 temp<- fluxSSBCH4 %>%
   group_by(date) %>%
   summarize(mean_temperature = mean(air_temperature))
+
+tempgap<- ggplot()+
+  geom_path(data = dplyr::filter(fluxSSBCO2, DOY < 89), aes(x = date, y = (air_temperature - 273.15)))+
+  geom_path(data = dplyr::filter(fluxSSBCO2, DOY > 119), aes(x = date, y = (air_temperature - 273.15)))+
+  ylab("Air Temperature (C)")+
+  xlab("")+
+  theme_bw()
   
-tempgas<-tempplot/ch4SSB + plot_layout(ncol = 1) + plot_annotation(
-  caption = 'Figure: Timeseries of a) air temperature and b) methane flux (umol/m2/s) from South Sparkling Bog with the dashed line representing ice-off.',
+  
+tempgas<-tempgap/ch4SSB/co2SSB + plot_layout(ncol = 1) + plot_annotation(
+  caption = 'Figure: Timeseries of a) air temperature and b) methane flux (umol/m2/s) c) carbon dioxide flux (umol/m2/s) from South Sparkling Bog with the dashed line representing ice-off.',
   theme = theme(plot.caption = element_text( hjust = 0, size = 10)))
 
-ggsave("tempCH4SSB.png", width = 10, height = 6, units = 'in', tempgas)
+ggsave("tempCH4CO2SSB.png", width = 10, height = 6, units = 'in', tempgas)
 
 ggplot()+
   geom_point(data = fluxSSBCH4, aes(x = date, y = ch4_flux), size = 0.05, color = "blue")+
@@ -68,7 +92,7 @@ ggplot()+
   ylab("CH4 Flux (µmol m-2 s-1)")+
   theme_bw()
 
-#CH4 and Temp SSB
+#CH4, CO2 and Temp SSB
 ggplot()+
   geom_point(data = fluxTBCH4, aes(x = (air_temperature), y = (ch4_flux)))+
   geom_point(data = fluxSSBCH4, aes(x = (air_temperature), y = (ch4_flux)))+
