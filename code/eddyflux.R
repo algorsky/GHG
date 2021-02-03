@@ -5,7 +5,7 @@ library(bigleaf)
 library(patchwork)
 # Read in data for SSB
 dataSSB = read_csv('data/FluxTower/eddypro_SSB_data.csv')
-dataTB = read_csv('data/FluxTower/eddypro_TB_data.csv')
+dataTB = read_csv('data/FluxTower/eddypro_TB_full_output.csv')
 
 #QC CH4 for SSB
 #qcSSBCH4<- dataSSB%>%
@@ -29,7 +29,7 @@ fluxSSBCO2$date<- as.Date(fluxSSBCO2$date, format = "%m/%d/%y")
 
 #QC CH4 for TB
 #qcTBCH4<- dataTB%>%
- #filter(ch4_flux > -9999)
+ #filter(ch4_flux > -9999 & ch4_flux > -0.1 & ch4_flux < 0.1)
 #ggplot(qcTBCH4, aes(ch4_flux))+
   #geom_histogram(binwidth = 0.01)
 
@@ -40,17 +40,18 @@ fluxTBCH4<-qcTBCH4%>%
   filter(ch4_flux > -0.05 & ch4_flux < 0.05)
 fluxTBCH4$date<- as.Date(fluxTBCH4$date, format = "%m/%d/%y")
 
+
 #CH4 Flux (µmol m-2 s-1)
-ch4SSB<-ggplot()+
+ch4<-ggplot()+
   geom_point(data = fluxSSBCH4, aes(x = date, y = ch4_flux), size = 0.05, color = "blue")+
-  #geom_point(data = fluxTBCH4, aes(x = date, y = ch4_flux), size = 0.05, color = "red")+
+  geom_point(data = fluxTBCH4, aes(x = date, y = ch4_flux), size = 0.05, color = "red")+
   geom_vline(xintercept = as.numeric(as.Date("2020-04-28")),  linetype = "dashed", color = "black")+
   geom_hline(yintercept = 0, color = "black", alpha = 0.4)+
   xlab("")+
   ylab("CH4 Flux (µmol m-2 s-1)")+
   theme_bw()
 
-co2SSB<- ggplot()+
+co2<- ggplot()+
   geom_point(data = fluxSSBCO2, aes(x = date, y = co2_flux), size = 0.05, color = "blue")+
   #geom_point(data = fluxTBCH4, aes(x = date, y = ch4_flux), size = 0.05, color = "red")+
   geom_vline(xintercept = as.numeric(as.Date("2020-04-28")),  linetype = "dashed", color = "black")+
@@ -70,38 +71,29 @@ temp<- fluxSSBCH4 %>%
   summarize(mean_temperature = mean(air_temperature))
 
 tempgap<- ggplot()+
-  geom_path(data = dplyr::filter(fluxSSBCO2, DOY < 89), aes(x = date, y = (air_temperature - 273.15)))+
-  geom_path(data = dplyr::filter(fluxSSBCO2, DOY > 119), aes(x = date, y = (air_temperature - 273.15)))+
+  geom_path(data = dplyr::filter(fluxTBCH4, DOY < 110), aes(x = date, y = (air_temperature - 273.15)))+
+  geom_path(data = dplyr::filter(fluxTBCH4, DOY > 112), aes(x = date, y = (air_temperature - 273.15)))+
   ylab("Air Temperature (C)")+
   xlab("")+
   theme_bw()
   
   
-tempgas<-tempgap/ch4SSB/co2SSB + plot_layout(ncol = 1) + plot_annotation(
+tempgas<-tempgap/ch4/co2 + plot_layout(ncol = 1) + plot_annotation(
   caption = 'Figure: Timeseries of a) air temperature and b) methane flux (umol/m2/s) c) carbon dioxide flux (umol/m2/s) from South Sparkling Bog with the dashed line representing ice-off.',
   theme = theme(plot.caption = element_text( hjust = 0, size = 10)))
 
 ggsave("tempCH4CO2SSB.png", width = 10, height = 6, units = 'in', tempgas)
 
-ggplot()+
-  geom_point(data = fluxSSBCH4, aes(x = date, y = ch4_flux), size = 0.05, color = "blue")+
-  #geom_point(data = fluxTBCH4, aes(x = date, y = ch4_flux), size = 0.05, color = "red")+
-  geom_vline(xintercept = as.numeric(as.Date("2020-04-28")),  linetype = "dashed", color = "black")+
-  geom_hline(yintercept = 0, color = "black", alpha = 0.4)+
-  xlab("")+
-  ylab("CH4 Flux (µmol m-2 s-1)")+
-  theme_bw()
 
 #CH4, CO2 and Temp SSB
-ggplot()+
-  geom_point(data = fluxTBCH4, aes(x = (air_temperature), y = (ch4_flux)))+
-  geom_point(data = fluxSSBCH4, aes(x = (air_temperature), y = (ch4_flux)))+
+ggplot(data = fluxTBCH4)+
+  geom_point(aes(x = (air_temperature-273.15), y = (ch4_flux)))+
   geom_smooth(aes(x = (air_temperature-273.15), y = (ch4_flux)), method = "lm")+
-  xlab("T (C)")+
+  xlab("Temperature (C)")+
   ylab("CH4 Flux (nmol m-2 s-1)")+
   theme_bw()
-SSBch4.lm = lm((air_temperature-273.15) ~ (ch4_flux*1000), data = fluxSSBCH4)
-summary(SSBch4.lm)
+TBch4.lm = lm((air_temperature-273.15) ~ (ch4_flux), data = fluxTBCH4)
+summary(TBch4.lm)
 
 #Month of May
 ggplot()+
