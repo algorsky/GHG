@@ -82,7 +82,7 @@ tempgas<-tempgap/ch4/co2 + plot_layout(ncol = 1) + plot_annotation(
   caption = 'Figure: Timeseries of a) air temperature and b) methane flux (umol/m2/s) c) carbon dioxide flux (umol/m2/s) from South Sparkling Bog with the dashed line representing ice-off.',
   theme = theme(plot.caption = element_text( hjust = 0, size = 10)))
 
-ggsave("tempCH4CO2SSB.png", width = 10, height = 6, units = 'in', tempgas)
+ggsave("tempCH4CO2.png", width = 10, height = 6, units = 'in', tempgas)
 
 
 #CH4, CO2 and Temp SSB
