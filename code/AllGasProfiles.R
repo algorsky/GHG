@@ -78,3 +78,20 @@ O2<-ggplot(dplyr::filter(tempdo, Bog == 'TB' | Bog == 'SSB')) +
 figure<-(CO2 + CH4 + Temp + O2) + plot_layout(guides = "collect", ncol = 2)
 
 ggsave("figure.png", width = 10, height = 6, units = 'in', figure)
+
+# Heat map 
+ggplot(data = dplyr::filter(gd, lake == 'SSB'), aes(x = date, y = depth, z = CH4*1000000)) +
+  geom_contour_filled(aes(fill = stat(level))) +
+  scale_y_reverse(name = "Depth (m)")+
+  xlab("")
+
+ ggplot(dplyr::filter(gd, lake == 'TB'| lake == 'SSB')) + 
+  geom_point(aes(x = CH4*1000000, y = depth, color = doy, shape = icecovered),size = 3) +
+  geom_path(aes(x = CH4*1000000, y = depth, group = date, color = doy)) +
+  facet_wrap(~lake) +
+  scale_y_reverse(name = "Depth (m)") +
+  scale_x_continuous(name = "dissolved CH4 gas (umol/L)")+
+  scale_colour_viridis_c(name = "Day of Year")+
+  scale_shape_discrete(name = "Ice Covered")+
+  theme_bw()+
+  theme()

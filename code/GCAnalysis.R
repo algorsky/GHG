@@ -5,7 +5,7 @@ library(neonDissGas)
 
 #QA/QC
 # Read in data 
-df = read_csv('data/2021Run1/rawdata.csv')  %>% 
+df = read_csv('data/GC2021/2021Run1/rawdata.csv')  %>% 
   filter(batch_id == 'SSB')%>%
   mutate(sample_id = str_replace_all(sample_id, pattern = "2020_01_", replacement = "2020-01-")) %>%  #because you switch from underscores to dashes
   separate(col = sample_id, into = c('lake','date','depth','replicate'), sep = "_", remove = FALSE) %>% 
@@ -40,7 +40,7 @@ air_samples <- df.2021 %>% filter(grepl("Air",depth)) %>%
 
 dat.2021 <- df.2021 %>% 
   filter(!grepl("Air",depth)) %>% 
-  select(batch_id,sample_id, lake, date,depth,CO2_FID,CO2_TCD,CH4_FID,CH4_TCD,N2O_ECD) %>% 
+  select(analysis_date, batch_id,sample_id, lake, date,depth,CO2_FID,CO2_TCD,CH4_FID,CH4_TCD,N2O_ECD) %>% 
   mutate(N2O_ECD = replace(N2O_ECD,N2O_ECD < 0, 0)) %>% 
   left_join(air_samples) %>% 
   rename(concentrationCO2Gas = CO2_TCD) %>% 
