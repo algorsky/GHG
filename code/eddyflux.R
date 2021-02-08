@@ -86,12 +86,14 @@ ggsave("tempCH4CO2.png", width = 10, height = 6, units = 'in', tempgas)
 
 
 #CH4, CO2 and Temp SSB
-ggplot(data = fluxTBCH4)+
+templinear<-ggplot(data = fluxTBCH4)+
   geom_point(aes(x = (air_temperature-273.15), y = (ch4_flux)))+
   geom_smooth(aes(x = (air_temperature-273.15), y = (ch4_flux)), method = "lm")+
   xlab("Temperature (C)")+
   ylab("CH4 Flux (nmol m-2 s-1)")+
   theme_bw()
+
+ggsave("templinear.png", width = 10, height = 6, units = 'in', templinear)
 TBch4.lm = lm((air_temperature-273.15) ~ (ch4_flux), data = fluxTBCH4)
 summary(TBch4.lm)
 

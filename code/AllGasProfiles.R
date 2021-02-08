@@ -80,18 +80,52 @@ figure<-(CO2 + CH4 + Temp + O2) + plot_layout(guides = "collect", ncol = 2)
 ggsave("figure.png", width = 10, height = 6, units = 'in', figure)
 
 # Heat map 
-ggplot(data = dplyr::filter(gd, lake == 'SSB'), aes(x = date, y = depth, z = CH4*1000000)) +
-  geom_contour_filled(aes(fill = stat(level))) +
-  scale_y_reverse(name = "Depth (m)")+
-  xlab("")
+# Normal scatter plot colorded by depth
+ggplot(dplyr::filter(gd, lake == 'TB' | lake == 'SSB')) +
+  geom_point(aes(x = date, y = depth, color = CH4*1000000))+
+    facet_wrap(~lake)
 
- ggplot(dplyr::filter(gd, lake == 'TB'| lake == 'SSB')) + 
-  geom_point(aes(x = CH4*1000000, y = depth, color = doy, shape = icecovered),size = 3) +
-  geom_path(aes(x = CH4*1000000, y = depth, group = date, color = doy)) +
-  facet_wrap(~lake) +
-  scale_y_reverse(name = "Depth (m)") +
-  scale_x_continuous(name = "dissolved CH4 gas (umol/L)")+
-  scale_colour_viridis_c(name = "Day of Year")+
-  scale_shape_discrete(name = "Ice Covered")+
-  theme_bw()+
-  theme()
+# Vertical linear interpolation of water column concentrations 
+interpData <- function(observationDF, date, maxdepth) {
+  a = observationDF %>% filter(date == date)
+  if (sum(!is.na(a$CH4)) == 0) {
+    print('nothing')
+    return(NULL)
+  }
+  
+  b = a %>% filter(!is.na(CH4))
+  if (max(b$depth) < (maxdepth/2)) {
+    print('too shallow')
+    return(NULL)
+  }
+  
+  yout = approx(x = a$depth, y = a$CH4, xout = c(0:maxdepth), rule = 2)
+  return(yout$y)
+}
+
+maxdepth = 7 # Should be depth of lowest sample, not necessarily depth of lake 
+usedates = gd %>%
+  dplyr::distinct(date) 
+
+f <- lapply(X = usedates$date, FUN = interpData, observationDF = gd,
+            maxdepth = maxdepth)
+
+f = as.data.frame(do.call(cbind, f))
+names(f) = usedates$date
+
+# Bind list into dataframe
+f2 = bind_cols(depth = 0:maxdepth,f) %>%
+  pivot_longer(-1, names_to = 'date', values_to = 'var') %>%
+  arrange(date,depth) %>%
+  mutate(date = as.Date(date))
+
+# Heat map 
+ggplot(f2) +
+  guides(fill = guide_colorsteps(barheight = unit(4, "cm"))) +
+  geom_contour_filled(aes(x = date, y = depth, z = var)) +
+  geom_point(data = gd, aes(x = date, y = depth), size = 0.25, color = 'white') +
+  scale_y_reverse()  +
+  scale_color_viridis_c(name = var) +
+  ylab('depth') + xlab('2018') +
+  xlim(as.Date(paste0(2018,'-01-01')), as.Date(paste0(2018,'-12-31'))) +
+  theme_bw(base_size = 8) 
