@@ -20,7 +20,7 @@ df = read_csv('data/GC2021/2021Run1/rawdata.csv')  %>%
   filter(!(parameter == "CO2_TCD" & value <=1000)) %>% 
   mutate(value = round(value,digits=0))
 
-#write.table(df, 'data/qaqc.csv', sep="\t")
+write.table(df, 'data/qaqc.csv', sep="\t")
 
 
 # Read in data 
@@ -55,7 +55,7 @@ dat.2021 <- df.2021 %>%
   mutate(headspaceTemp = 0.2) %>% #degC Assume it is the same was water temp
   mutate(barometricPressure = 103.991) #kpa
 
-write.table(dat.2021, 'data/GC2021/dat.2021.csv', sep="\t")
+#write.table(dat.2021, 'data/GC2021/dat.2021.csv', sep="\t")
 
 dat = read_csv('data/GC2021/dat.2021.csv')
 dat.out <- def.calc.sdg.conc(as.data.frame(dat)) %>%
