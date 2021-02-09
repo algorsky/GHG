@@ -89,7 +89,7 @@ heatmap<- heatmap%>%
   mutate(sampledate = date)%>%
   mutate(ch4unit = CH4*1000000)
 # Contour Map... you can see the problems 
-ggplot(heatmap) +
+heatCH4<-ggplot(heatmap) +
   geom_contour_filled(aes(x = sampledate, y = depth, z = ch4unit)) +
   geom_point(aes(x = sampledate, y = depth), size = 0.25, color = "white") +
   scale_y_reverse() +
@@ -98,6 +98,6 @@ ggplot(heatmap) +
   labs(fill = ("CH4(umol/L)"))+
   scale_color_distiller() +
   theme_bw(base_size = 14)
-
+ggsave("HeatMap_CH4.png", width = 10, height = 6, units = 'in', heatCH4)
 
 
