@@ -4,14 +4,14 @@ library(lubridate)
 library(bigleaf)
 library(patchwork)
 # Read in data for SSB
-dataSSB = read_csv('data/FluxTower/eddypro_SSB_data.csv')
+dataSSB = read_csv('data/FluxTower/eddypro_SSB_full_output.csv')
 dataTB = read_csv('data/FluxTower/eddypro_TB_full_output.csv')
 
 #QC CH4 for SSB
 #qcSSBCH4<- dataSSB%>%
- # filter(ch4_flux > -9999)
-#ggplot(qcSSBCH4, aes(ch4_flux))+
- # geom_histogram(binwidth = 0.01)
+ #filter(ch4_flux > -9999)
+ #ggplot(qcSSBCH4, aes(ch4_flux))+
+  #geom_histogram(binwidth = 0.01)
 
 qcSSBCH4<- dataSSB%>%
   filter(ch4_flux > -9999)%>%
@@ -53,7 +53,7 @@ ch4<-ggplot()+
 
 co2<- ggplot()+
   geom_point(data = fluxSSBCO2, aes(x = date, y = co2_flux), size = 0.05, color = "blue")+
-  #geom_point(data = fluxTBCH4, aes(x = date, y = ch4_flux), size = 0.05, color = "red")+
+  geom_point(data = fluxTBCH4, aes(x = date, y = ch4_flux), size = 0.05, color = "red")+
   geom_vline(xintercept = as.numeric(as.Date("2020-04-28")),  linetype = "dashed", color = "black")+
   geom_hline(yintercept = 0, color = "black", alpha = 0.4)+
   xlab("")+
