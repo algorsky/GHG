@@ -94,3 +94,4 @@ CH4TB<-ggplot(f2TB) +
   scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b, %Y"),
                limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2021,'-1-15'))))
 
+heatch4patch<-(CH4SSB + CH4TB) + plot_layout(guides = "collect", ncol = 2)
