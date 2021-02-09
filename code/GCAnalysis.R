@@ -20,7 +20,7 @@ df = read_csv('data/GC2021/2021Run1/rawdata.csv')  %>%
   filter(!(parameter == "CO2_TCD" & value <=1000)) %>% 
   mutate(value = round(value,digits=0))
 
-write.table(df, 'data/qaqc.csv', sep="\t")
+#write.table(df, 'data/qaqc.csv', sep="\t")
 
 
 # Read in data 
