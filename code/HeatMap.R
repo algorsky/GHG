@@ -2,6 +2,8 @@ library(tidyverse)
 library(lubridate)
 library(patchwork)
 library(scales)
+library(metR)
+library(RColorBrewer)
 
 ## Load the data from Github
 # Read in data 
@@ -77,21 +79,24 @@ CH4SSB<-ggplot(f2SSB) +
   scale_y_reverse()  +
   scale_color_viridis_c(name = var) +
   ylab('depth') + xlab('') +
-  labs(fill = ("CH4(umol/L)"))+
-  theme_bw(base_size = 8) +
-  scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b, %Y"),
-               limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2021,'-1-15'))))
-# Heat map 
-CH4TB<-ggplot(f2TB) +
-  guides(fill = guide_colorsteps(barheight = unit(4, "cm"))) +
-  geom_contour_filled(aes(x = sampledate, y = depth, z = var)) +
-  geom_point(data = heatmapTB, aes(x = sampledate, y = depth), size = 0.25, color = 'white') +
-  scale_y_reverse()  +
-  scale_color_viridis_c(name = var) +
-  ylab('depth') + xlab('') +
-  labs(fill = ("CH4(umol/L)"))+
+  labs(fill = ("South Sparkling Bog \nCH4(umol/L)"))+
   theme_bw(base_size = 8) +
   scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b, %Y"),
                limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2021,'-1-15'))))
 
-heatch4patch<-(CH4SSB + CH4TB) + plot_layout(guides = "collect", ncol = 2)
+
+# Heat map 
+CH4TB<-ggplot(f2TB) +
+  guides(fill = guide_colorsteps(barheight = unit(4, "cm"))) +
+  geom_contour_filled(aes(x = sampledate, y = depth, z = var)) +
+  geom_point(data = heatmapSSB, aes(x = sampledate, y = depth), size = 0.25, color = 'white') +
+  scale_y_reverse()  +
+  scale_color_viridis_c(name = var) +
+  ylab('depth') + xlab('') +
+  labs(fill = ("Trout Bog\nCH4(umol/L)"))+
+  theme_bw(base_size = 8) +
+  scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b, %Y"),
+               limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2021,'-1-15'))))
+
+heatch4patch<-(CH4SSB + CH4TB) + plot_layout(guides = "collect", ncol = 1)
+ggsave("figures/HeatCombo_CH4.png", width = 10, height = 6, units = 'in', heatch4patch)

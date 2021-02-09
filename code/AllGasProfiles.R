@@ -87,7 +87,8 @@ heatmap$date = as.Date(heatmap$date, format =  "%m/%d/%y")
 
 heatmap<- heatmap%>%
   mutate(sampledate = date)%>%
-  mutate(ch4unit = CH4*1000000)
+  mutate(ch4unit = CH4*1000000)%>%
+  mutate(co2unit = CO2*1000000)
 # Contour Map... you can see the problems 
 heatCH4<-ggplot(heatmap) +
   geom_contour_filled(aes(x = sampledate, y = depth, z = ch4unit)) +
@@ -97,7 +98,20 @@ heatCH4<-ggplot(heatmap) +
   facet_wrap(~lake)+
   labs(fill = ("CH4(umol/L)"))+
   scale_color_distiller() +
-  theme_bw(base_size = 14)
+  theme_bw(base_size = 12)
+heatCO2<-ggplot(heatmap) +
+  geom_contour_filled(aes(x = sampledate, y = depth, z = co2unit)) +
+  geom_point(aes(x = sampledate, y = depth), size = 0.25, color = "white") +
+  scale_y_reverse() +
+  xlab("")+
+  facet_wrap(~lake)+
+  labs(fill = ("CO2(umol/L)"))+
+  scale_color_distiller() +
+  theme_bw(base_size = 12)
+
+heatmaps<-(heatCH4 + heatCO2) + plot_layout(guides = "collect", nrow = 2)
+
+ggsave("HeatMap_CH4.png", width = 10, height = 6, units = 'in', heatCH4)
 ggsave("HeatMap_CH4.png", width = 10, height = 6, units = 'in', heatCH4)
 
 
