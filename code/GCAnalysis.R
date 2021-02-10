@@ -67,6 +67,18 @@ tidy.dat.out2021 <- def.calc.sdg.conc(as.data.frame(dat)) %>%
   filter(lake == 'TB' | lake == 'SSB')%>%
   select(lake,date,depth,dissolvedCO2,dissolvedCH4)
 
-write.table(tidy.dat.out2021, 'data/GC2021/tidy.dat.out2021.csv', sep="\t")
+tidy.dat.outall <- def.calc.sdg.conc(as.data.frame(dat)) %>%
+  filter(lake == 'TB' | lake == 'SSB')%>%
+  select(lake,date,depth,barometricPressure,waterTemp, headspaceTemp, dissolvedCO2, concentrationCO2Air,dissolvedCH4, concentrationCH4Air, dissolvedN2O, concentrationN2OAir)
+
+#Gas Saturation
+dat.out.sat <- def.calc.sdg.sat(as.data.frame(tidy.dat.outall)) %>%
+  filter(lake == 'TB' | lake == 'SSB')%>%
+  select(lake,date,depth,waterTemp,satConcCO2,satConcCH4, CO2PercSat, CH4PercSat)
+
+#write.table(tidy.dat.out2021, 'data/GC2021/tidy.dat.out2021.csv', sep="\t")
+#Dissolved Gas Percent Saturation
+
+
 
 

@@ -25,6 +25,7 @@ gd <- gas %>%
   mutate(icecovered = ifelse(month(date)%in% 1:4,"yes",
                              "no"))
 
+
 # CO2
 CO2<-ggplot(dplyr::filter(gd, lake == 'TB'| lake == 'SSB')) + 
   geom_point(aes(x = CO2*1000000, y = depth, color = doy, shape = icecovered),size = 3) +
