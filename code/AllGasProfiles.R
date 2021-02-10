@@ -112,7 +112,7 @@ heatCO2<-ggplot(heatmap) +
 
 heatmaps<-(heatCH4 + heatCO2) + plot_layout(guides = "collect", nrow = 2)
 
-ggsave("HeatMap.png", width = 10, height = 6, units = 'in', heatmaps)
+ggsave("figures/HeatMap.png", width = 15, height = 10, units = 'in', heatmaps)
 
 
 
