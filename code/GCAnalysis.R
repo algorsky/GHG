@@ -81,4 +81,7 @@ dat.out.sat <- def.calc.sdg.sat(as.data.frame(tidy.dat.outall)) %>%
 
 
 
-
+dat.out.all = read_csv('data/GC2021/data.all.csv')
+tidy.dat.all <- def.calc.sdg.conc(as.data.frame(dat.out.all)) %>%
+  filter(lake == 'TB' | lake == 'SSB')%>%
+  select(lake,date,depth,dissolvedCO2,dissolvedCH4)
