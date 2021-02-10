@@ -80,7 +80,7 @@ O2<-ggplot(dplyr::filter(tempdo, Bog == 'TB' | Bog == 'SSB')) +
 
 figure<-(CO2 + CH4 + Temp + O2) + plot_layout(guides = "collect", ncol = 2)
 
-ggsave("figure.png", width = 10, height = 6, units = 'in', figure)
+ggsave("figures/Profiles.png", width = 10, height = 6, units = 'in', figure)
 
 # Heat map 
 heatmap = read_csv('data/GC2021/fullheat.csv')
