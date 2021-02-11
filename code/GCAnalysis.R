@@ -58,6 +58,7 @@ dat.2021 <- df.2021 %>%
 #write.table(dat.2021, 'data/GC2021/dat.2021.csv', sep="\t")
 
 dat = read_csv('data/GC2021/dat.2021.csv')
+dat.all = read_csv('data/GC2021/dat.csv')
 dat.out <- def.calc.sdg.conc(as.data.frame(dat)) %>%
   filter(lake == 'TB' | lake == 'SSB')%>%
   select(lake,date,depth,dissolvedCO2,dissolvedCH4) %>% 
@@ -67,7 +68,7 @@ tidy.dat.out2021 <- def.calc.sdg.conc(as.data.frame(dat)) %>%
   filter(lake == 'TB' | lake == 'SSB')%>%
   select(lake,date,depth,dissolvedCO2,dissolvedCH4)
 
-tidy.dat.outall <- def.calc.sdg.conc(as.data.frame(dat)) %>%
+tidy.dat.outall <- def.calc.sdg.conc(as.data.frame(dat.all)) %>%
   filter(lake == 'TB' | lake == 'SSB')%>%
   select(lake,date,depth,barometricPressure,waterTemp, headspaceTemp, dissolvedCO2, concentrationCO2Air,dissolvedCH4, concentrationCH4Air, dissolvedN2O, concentrationN2OAir)
 
@@ -80,7 +81,7 @@ dat.out.sat <- def.calc.sdg.sat(as.data.frame(tidy.dat.outall)) %>%
 #Dissolved Gas Percent Saturation
 
 
-
+df = read_csv('data/GC2021/2021Run1/rawdata.csv') 
 dat.out.all = read_csv('data/GC2021/data.all.csv')
 tidy.dat.all <- def.calc.sdg.conc(as.data.frame(dat.out.all)) %>%
   filter(lake == 'TB' | lake == 'SSB')%>%
