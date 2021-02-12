@@ -1,52 +1,13 @@
 library(tidyverse)
 library(lubridate)
 library(patchwork)
+library(scales)
 
 
 ################## Temp/Light Sensor ##################
-# 2020 Summer
-light.list = list()
-for(i in 1:7) {
-  light.list[[i]] = read_csv(list.files(path='data/Buoy/2020/Temp', full.names = TRUE)[i], skip = 1) %>%
-    # read_csv('2018_2019_underice/Temp/SB_1.csv', skip = 1) %>%
-    mutate(depth = i)
-}
-light.summer.2020 = light.list %>%  bind_rows() %>%
-  mutate(Temp.C = 5/9 * (`Temp, (*F)` - 32))
-names(light.summer.2020) = c('Date.GMT','Temp.F','Intensity.lum.ft2','ButtonDown','ButtonUp','HostConnect','EOF','depth','Temp.C')
-
-#QA/QC
-light.summer.2020 = light.summer.2020 %>%
-  filter(as.Date(Date.GMT) > as.Date('2020-05-22')) %>%
-  filter(as.Date(Date.GMT) < as.Date('2020-10-25 ')) %>%
-  arrange(Date.GMT, depth)
-
-# 2020 Winter
-light.list1 = list()
-light.list2 = list()
-for(i in 1:7) {
-  light.list1[[i]] = read_csv(list.files(path='data/Buoy/Temp/2MAR2020' , full.names = TRUE)[i], skip = 1) %>%
-    # read_csv('2018_2019_underice/Temp/SB_1.csv', skip = 1) %>%
-    mutate(depth = i)
-  
-  light.list2[[i]] = read_csv(list.files(path='data/Buoy/Temp/19MAY2020' , full.names = TRUE)[i], skip = 1) %>%
-    # read_csv('2018_2019_underice/Temp/SB_1.csv', skip = 1) %>%
-    mutate(depth = i)
-}
-light.2020 = light.list1 %>%  bind_rows() %>%
-  bind_rows(light.list2 %>%  bind_rows()) %>%
-  mutate(Temp.C = 5/9 * (`Temp, (*F)` - 32))
-names(light.2020) = c('Date.GMT','Temp.F','Intensity.lum.ft2','ButtonDown','ButtonUp','HostConnect','EOF','depth','Temp.C')
-
-#QA/QC
-light.2020 = light.2020 %>% filter(as.Date(Date.GMT) != as.Date('2020-03-02')) %>%
-  filter(as.Date(Date.GMT) > as.Date('2019-11-15')) %>%
-  filter(as.Date(Date.GMT) < as.Date('2020-05-19')) %>%
-  arrange(Date.GMT, depth)
-
-#Combine two buoys
-buoy.2020<-rbind(light.2020, light.summer.2020)
-write.csv(buoy.2020,"data/Buoy/temp.buoy2020.csv", row.names = FALSE)
+buoy.2020 = read_csv('data/Buoy/temp.buoy2020.csv')
+buoy.2020<- buoy.2020%>%
+  mutate(sampledate = as.Date(Date.GMT))
 
 #Plotting Temperature
 buoy.temp2020<-ggplot(buoy.2020) +
@@ -56,41 +17,10 @@ buoy.temp2020<-ggplot(buoy.2020) +
   # facet_wrap(vars(depth)) +
   labs(title = 'Sparkling Bog 2020') + ylab('Temp (degC)') + xlab('Date') +
   NULL
-
 ggsave("figures/buoytemp2020.png", width = 7, height = 3, units = 'in', buoy.temp2020)
 
-p.t2 = ggplot(light.2020) +
-  geom_line(aes(x = Date.GMT, y = Temp.C, color = depth, group = depth)) +
-  scale_colour_viridis_c() +
-  theme_bw() +
-  # facet_wrap(vars(depth)) +
-  labs(title = 'Sparkling Bog 2020') + ylab('Temp (degC)') + xlab('Date') +
-  NULL
-
-#Combo Plot
-p.t1/p.t2 & ylim(c(0,15))
-ggsave('SparklingBogTempString.png',width = 7, height = 5)
-
-#Surface Plot
-ggplot(filter(light.2019, depth == 1)) + geom_line(aes(x = Date.GMT, y = Temp.C, color = '2019')) +
-  geom_line(data = filter(light.2020, depth == 1), aes(x = Date.GMT - 365*24*60*60, y = Temp.C, color = '2020')) +
-  theme_bw() +
-  scale_color_manual(name = 'Year',values = c('lightblue4','gold')) +
-  labs(title = 'Sparkling Bog 2019-2020') + ylab('Temp (degC)') + xlab('Date') +
-  ylim(c(0,10))
-ggsave('SparklingBogTempString_Surf.png',width = 7, height = 3)
-
-
 #Plotting Light
-p.l1 = ggplot(light.2019) +
-  geom_line(aes(x = Date.GMT, y = Intensity.lum.ft2, color = depth, group = depth)) +
-  scale_colour_viridis_c() +
-  theme_bw() +
-  # facet_wrap(vars(depth)) +
-  labs(title = 'Sparkling Bog 2019') + ylab('Light(lum/ft2)') + xlab('Date') +
-  NULL
-
-p.l2 = ggplot(light.2020) +
+buoy.light2020 = ggplot(buoy.2020) +
   geom_line(aes(x = Date.GMT, y = Intensity.lum.ft2, color = depth, group = depth)) +
   scale_colour_viridis_c() +
   theme_bw() +
@@ -98,18 +28,57 @@ p.l2 = ggplot(light.2020) +
   labs(title = 'Sparkling Bog 2020') + ylab('Light(lum/ft2)') + xlab('Date') +
   NULL
 
-#Combo Plot
-p.l1/p.l2
-ggsave('SparklingBogLightString.png',width = 7, height = 5) & ylim(0,420)
-
 #Surface Plot
-ggplot(filter(light.2019, depth == 1)) +
-  geom_line(aes(x = Date.GMT, y = Intensity.lum.ft2, color = '2019'), alpha = 0.7) +
-  geom_line(data = filter(light.2020, depth == 1), aes(x = Date.GMT - 365*24*60*60, y = Intensity.lum.ft2, color = '2020'), alpha = 0.7) +
+ggplot(filter(buoy.2020, depth == 1)) +
+  geom_line(aes(x = Date.GMT, y = Intensity.lum.ft2, color = depth), alpha = 0.7) +
   theme_bw() +
-  scale_color_manual(name = 'Year',values = c('lightblue4','gold')) +
-  labs(title = 'Sparkling Bog 2019-2020') + ylab('Light(lum/ft2)') + xlab('Date') +
-  ylim(0,50)
+  labs(title = 'Sparkling Bog 2019-2020') + ylab('Light(lum/ft2)') + xlab('Date')
+#ggsave('SparklingBogLightString_Surf.png',width = 7, height = 3)
 
-ggsave('SparklingBogLightString_Surf.png',width = 7, height = 3)
+#Heat Map
+interpData <- function(observationDF, date, maxdepth) {
+  a = observationDF %>% filter(sampledate == date)
+  if (sum(!is.na(a$Temp.C)) == 0) {
+    print('nothing')
+    return(NULL)
+  }
+  
+  b = a %>% filter(!is.na(Temp.C))
+  if (max(b$depth) < (maxdepth/2)) {
+    print('too shallow')
+    return(NULL)
+  }
+  
+  yout = approx(x = a$depth, y = a$Temp.C, xout = c(0:maxdepth), rule = 2)
+  return(yout$y)
+}
+
+maxdepth = 7 # Should be depth of lowest sample, not necessarily depth of lake 
+usedates = buoy.2020 %>%
+  dplyr::distinct(sampledate) 
+
+f <- lapply(X = usedates$sampledate, FUN = interpData, observationDF = buoy.2020,
+            maxdepth = maxdepth)
+
+f = as.data.frame(do.call(cbind, f))
+names(f) = usedates$sampledate
+
+# Bind list into dataframe
+f2 = bind_cols(depth = 0:maxdepth,f) %>%
+  pivot_longer(-1, names_to = 'sampledate', values_to = 'var') %>%
+  arrange(sampledate,depth) %>%
+  mutate(sampledate = as.Date(sampledate))
+
+# Heat map 
+theme_set(theme_bw())
+tempheat<-ggplot(f2) +
+  guides(fill = guide_colorsteps(barheight = unit(4, "cm")), name = "Temp (degC)") +
+  geom_contour_filled(aes(x = sampledate, y = depth, z = var)) +
+  scale_y_reverse()  +
+  scale_color_viridis_c(name = var) +
+  ylab('Depth (m)') + xlab('') +
+  #xlim(as.Date(paste0(2018,'-01-01')), as.Date(paste0(2018,'-12-31'))) +
+  theme_bw(base_size = 8)+
+  scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b %y"),
+               limits = c(as.Date(paste0(2019,'-12-15')), as.Date(paste0(2020,'-10-26'))))
 
