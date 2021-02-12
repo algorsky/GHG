@@ -115,4 +115,47 @@ heatmaps<-(heatCH4 + heatCO2) + plot_layout(guides = "collect", nrow = 2)
 ggsave("figures/HeatMap.png", width = 15, height = 10, units = 'in', heatmaps)
 
 
+#Gas Saturation
+gas.saturation = read_csv('data/GC2021/gas.sat.csv')
+gas.saturation$date <- as.Date(gas.saturation$date, format =  "%m/%d/%y")
 
+gas.sat.surface<- gas.saturation%>%
+  filter(depth == 0)
+
+co2sat<-ggplot(dplyr::filter(gas.saturation, lake == 'TB'| lake == 'SSB')) + 
+  geom_point(aes(x = date, y = CO2persat, color = depth), size = 3) +
+  facet_wrap(~lake) +
+  ylab("CO2 Percent Saturation")+
+  xlab("")+
+  theme_bw()+
+  scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b %y"),
+               limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2021,'-01-15'))))
+ch4sat<-ggplot(dplyr::filter(gas.saturation, lake == 'TB'| lake == 'SSB')) + 
+  geom_point(aes(x = date, y = CH4persat, color = depth), size = 3) +
+  facet_wrap(~lake) +
+  ylab("CH4 Percent Saturation")+
+  xlab("")+
+  theme_bw()+
+  scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b %y"),
+               limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2021,'-01-15'))))
+
+#Surface Saturation
+surCO2<-ggplot(dplyr::filter(gas.sat.surface, lake == 'TB'| lake == 'SSB')) + 
+  geom_point(aes(x = date, y = CO2persat), size = 3) +
+  facet_wrap(~lake) +
+  xlab("")+
+  ylab("Surface CO2 Percent Saturation")+
+  theme_bw()+
+  scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b %y"),
+               limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2021,'-01-15'))))
+surCH4<-ggplot(dplyr::filter(gas.sat.surface, lake == 'TB'| lake == 'SSB')) + 
+  geom_point(aes(x = date, y = CH4persat), size = 3) +
+  facet_wrap(~lake) +
+  xlab("")+
+  ylab("Surface CH4 Percent Saturation")+
+  theme_bw()+
+  scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b %y"),
+               limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2021,'-01-15'))))
+
+saturation<-(co2sat + ch4sat + surCO2 + surCH4) + plot_layout(guides = "collect", ncol = 2)
+ggsave("figures/saturation.png", width = 15, height = 10, units = 'in', saturation)

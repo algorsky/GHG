@@ -68,21 +68,21 @@ tidy.dat.out2021 <- def.calc.sdg.conc(as.data.frame(dat)) %>%
   filter(lake == 'TB' | lake == 'SSB')%>%
   select(lake,date,depth,dissolvedCO2,dissolvedCH4)
 
-tidy.dat.outall <- def.calc.sdg.conc(as.data.frame(dat.all)) %>%
+sat.dat.out2021 <- def.calc.sdg.conc(as.data.frame(dat)) %>%
   filter(lake == 'TB' | lake == 'SSB')%>%
   select(lake,date,depth,barometricPressure,waterTemp, headspaceTemp, dissolvedCO2, concentrationCO2Air,dissolvedCH4, concentrationCH4Air, dissolvedN2O, concentrationN2OAir)
 
 #Gas Saturation
-dat.out.sat <- def.calc.sdg.sat(as.data.frame(tidy.dat.outall)) %>%
+tidy.dat.out.all = read_csv('data/GC2021/tidy.dat.out.all.csv')
+dat.out.sat <- def.calc.sdg.sat(as.data.frame(tidy.dat.out.all)) %>%
   filter(lake == 'TB' | lake == 'SSB')%>%
   select(lake,date,depth,waterTemp,satConcCO2,satConcCH4, CO2PercSat, CH4PercSat)
+dat.out.sat$date = as.Date(dat.out.sat$date, format =  "%m/%d/%y")
+gas.sat <- dat.out.sat %>% 
+  group_by(lake, date, depth) %>% 
+  summarise(
+    CO2persat = mean(CO2PercSat),
+    CH4persat = mean(CH4PercSat))
 
-#write.table(tidy.dat.out2021, 'data/GC2021/tidy.dat.out2021.csv', sep="\t")
-#Dissolved Gas Percent Saturation
+#write.table(gas.sat, 'data/GC2021/gas.sat.csv', sep="\t")
 
-
-df = read_csv('data/GC2021/2021Run1/rawdata.csv') 
-dat.out.all = read_csv('data/GC2021/data.all.csv')
-tidy.dat.all <- def.calc.sdg.conc(as.data.frame(dat.out.all)) %>%
-  filter(lake == 'TB' | lake == 'SSB')%>%
-  select(lake,date,depth,dissolvedCO2,dissolvedCH4)
