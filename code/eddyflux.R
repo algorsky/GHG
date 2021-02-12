@@ -37,7 +37,8 @@ qcTBCH4<- dataTB%>%
   filter(ch4_flux > -9999)%>%
   filter(qc_ch4_flux <= 1)
 fluxTBCH4<-qcTBCH4%>%
-  filter(ch4_flux > -0.05 & ch4_flux < 0.05)
+  filter(ch4_flux > -0.05 & ch4_flux < 0.05)%>%
+  mutate(airtemp = (air_temperature - 273.15))
 fluxTBCH4$date<- as.Date(fluxTBCH4$date, format = "%m/%d/%y")
 
 
@@ -59,23 +60,31 @@ co2<- ggplot()+
   xlab("")+
   ylab("CO2 Flux (µmol m-2 s-1)")+
   theme_bw()
-  
 
-tempplot<- ggplot(fluxSSBCO2)+
-  geom_path(aes(x = date, y = (air_temperature-273.15)))+
-  ylab("Air Temperature (C)")+
-  xlab("")+
-  theme_bw()
-temp<- fluxSSBCH4 %>%
-  group_by(date) %>%
-  summarize(mean_temperature = mean(air_temperature))
+buoy = read_csv('data/Buoy/temp.buoy2020.csv')
+buoysurf <- buoy %>%
+  filter(depth == 1)%>%
+  filter(as.Date(Date.GMT) > as.Date('2020-03-15')) %>%
+  filter(as.Date(Date.GMT) < as.Date('2020-10-25'))%>%
+  mutate(date = as.Date(Date.GMT))
 
+buoybottom<- buoy %>%
+  filter(depth == 7)%>%
+  filter(as.Date(Date.GMT) > as.Date('2020-03-15')) %>%
+  filter(as.Date(Date.GMT) < as.Date('2020-10-25'))%>%
+  mutate(date = as.Date(Date.GMT))
+
+colors <- c("Air Temperature" = "black", "Surface Temperature" = "green", "Bottom Temperature" = "yellow")
+theme_set(theme_bw())
 tempgap<- ggplot()+
-  geom_path(data = dplyr::filter(fluxTBCH4, DOY < 110), aes(x = date, y = (air_temperature - 273.15)))+
-  geom_path(data = dplyr::filter(fluxTBCH4, DOY > 112), aes(x = date, y = (air_temperature - 273.15)))+
-  ylab("Air Temperature (C)")+
+  geom_path(data = dplyr::filter(fluxTBCH4, DOY < 110), aes(x = date, y = (airtemp), color = "Air Temperature"))+
+  geom_path(data = dplyr::filter(fluxTBCH4, DOY > 112), aes(x = date, y = (airtemp), color = "Air Temperature"))+
+  geom_path(data = buoysurf, aes(x = date, y = Temp.C, color = "Surface Temperature"))+
+  geom_path(data = buoybottom, aes(x = date, y = Temp.C, color = "Bottom Temperature"))+
+  ylab("Temperature (C)")+
   xlab("")+
-  theme_bw()
+  scale_color_manual(values = colors)+
+  theme(legend.position = "top", legend.title = element_blank())
   
   
 tempgas<-tempgap/ch4/co2 + plot_layout(ncol = 1) + plot_annotation(
