@@ -46,6 +46,7 @@ light.2020 = light.2020 %>% filter(as.Date(Date.GMT) != as.Date('2020-03-02')) %
 
 #Combine two buoys
 buoy.2020<-rbind(light.2020, light.summer.2020)
+write.csv(buoy.2020,"data/Buoy/temp.buoy2020.csv", row.names = FALSE)
 
 #Plotting Temperature
 buoy.temp2020<-ggplot(buoy.2020) +
