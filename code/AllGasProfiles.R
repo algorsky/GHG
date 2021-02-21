@@ -24,8 +24,17 @@ gd <- gas %>%
   )%>%
   mutate(icecovered = ifelse(month(date)%in% 1:4,"yes",
                              "no"))
-
-
+ssb.gas = read_csv('data/GC2021/SSB_GHG.csv')
+ssb.gas$date = as.Date(ssb.gas$date, format =  "%m/%d/%y")
+ggplot(dplyr::filter(ssb.gas, lake == 'TB'| lake == 'SSB')) + 
+  geom_point(aes(x = CO2, y = depth, color = date), size = 3) +
+  geom_path(aes(x = CO2, y = depth, group = date, color = date)) +
+  facet_wrap(~lake) +
+  scale_y_reverse(name = "Depth (m)") +
+  scale_x_continuous(name = "dissolved CO2 gas (umol/L)", limits = c(0, 2000))+
+  scale_colour_viridis_c()+
+  theme_bw()+
+  theme(legend.position = "none")
 # CO2
 CO2<-ggplot(dplyr::filter(gd, lake == 'TB'| lake == 'SSB')) + 
   geom_point(aes(x = CO2*1000000, y = depth, color = doy, shape = icecovered),size = 3) +

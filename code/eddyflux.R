@@ -5,7 +5,7 @@ library(bigleaf)
 library(patchwork)
 # Read in data for SSB
 dataSSB = read_csv('data/FluxTower/eddypro_SSB_full_output.csv')
-dataTB = read_csv('data/FluxTower/eddypro_TB_full_output.csv')
+dataTB = read_csv('data/FluxTower/eddypro_TB_full_output_new.csv')
 
 #QC CH4 for SSB
 #qcSSBCH4<- dataSSB%>%
@@ -41,6 +41,14 @@ fluxTBCH4<-qcTBCH4%>%
   mutate(airtemp = (air_temperature - 273.15))
 fluxTBCH4$date<- as.Date(fluxTBCH4$date, format = "%m/%d/%y")
 
+qcTBCO2<- dataTB%>%
+  filter(co2_flux > -9999)%>%
+  filter(qc_co2_flux <= 1)%>%
+  filter(co2_flux > -10 & co2_flux < 10)
+fluxTBCO2<-qcTBCO2%>%
+  filter(co2_flux > -10 & co2_flux < 10)
+fluxTBCO2$date<- as.Date(fluxTBCO2$date, format = "%m/%d/%y")
+
 
 #CH4 Flux (µmol m-2 s-1)
 ch4<-ggplot()+
@@ -52,16 +60,21 @@ ch4<-ggplot()+
   ylab("CH4 Flux (µmol m-2 s-1)")+
   theme_bw()
 
+
+colours <- c("South Sparkling Bog" = "blue", "Trout Bog" = "red")
+theme_set(theme_bw())
 co2<- ggplot()+
-  geom_point(data = fluxSSBCO2, aes(x = date, y = co2_flux), size = 0.05, color = "blue")+
-  geom_point(data = fluxTBCH4, aes(x = date, y = ch4_flux), size = 0.05, color = "red")+
+  geom_point(data = fluxSSBCO2, aes(x = date, y = co2_flux, color = "South Sparkling Bog"), size = 0.05)+
+  geom_point(data = fluxTBCO2, aes(x = date, y = co2_flux, color = "Trout Bog"), size = 0.05)+
   geom_vline(xintercept = as.numeric(as.Date("2020-04-28")),  linetype = "dashed", color = "black")+
   geom_hline(yintercept = 0, color = "black", alpha = 0.4)+
   xlab("")+
   ylab("CO2 Flux (µmol m-2 s-1)")+
-  theme_bw()
+  scale_color_manual(values = colours)+
+  theme(legend.position = "bottom", legend.title = element_blank())
 
 buoy = read_csv('data/Buoy/temp.buoy2020.csv')
+buoy$Date.GMT<- as.Date(buoy$Date.GMT, format = "%m/%d/%y")
 buoysurf <- buoy %>%
   filter(depth == 1)%>%
   filter(as.Date(Date.GMT) > as.Date('2020-03-15')) %>%
@@ -87,9 +100,11 @@ tempgap<- ggplot()+
   theme(legend.position = "top", legend.title = element_blank())
   
   
-tempgas<-tempgap/ch4/co2 + plot_layout(ncol = 1) + plot_annotation(
-  caption = 'Figure: Timeseries of a) air temperature and b) methane flux (umol/m2/s) c) carbon dioxide flux (umol/m2/s) from South Sparkling Bog (blue) and Trout Bog (red) with the dashed line representing ice-off.',
-  theme = theme(plot.caption = element_text( hjust = 0, size = 10)))
+tempgas<-tempgap/ch4/co2 + plot_layout(ncol = 1)  
+  
+#plot_annotation(
+  #caption = 'Figure: Timeseries of a) air/water temperature, b) methane flux (umol/m2/s) and c) carbon dioxide flux (umol/m2/s) from South Sparkling Bog (blue) and Trout Bog (red) with the dashed line representing ice-off.',
+ # theme = theme(plot.caption = element_text( hjust = 0, size = 10)))
 
 ggsave("figures/eddyco.png", width = 10, height = 6, units = 'in', tempgas)
 
