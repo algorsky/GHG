@@ -49,6 +49,14 @@ fluxTBCO2<-qcTBCO2%>%
   filter(co2_flux > -10 & co2_flux < 10)
 fluxTBCO2$date<- as.Date(fluxTBCO2$date, format = "%m/%d/%y")
 
+ch4median<- fluxSSBCH4%>%
+  group_by(date)%>%
+  summarise(median = median(ch4_flux))
+ch4median$doy = yday(ch4median$date)
+
+ggplot(data = ch4median)+
+  geom_point(aes(x = doy, y = median))
+
 
 #CH4 Flux (µmol m-2 s-1)
 ch4<-ggplot()+

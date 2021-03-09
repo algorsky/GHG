@@ -8,50 +8,41 @@ library(scales)
 
 ## Load the data from Github
 # Read in data 
-prac2021 = read_csv('data/GC2021/tidy.dat.out2021.csv')
-prac2020 = read_csv('data/tidy.dat.out.csv')
-gas<- rbind(prac2021, prac2020)
-gas$date = as.Date(gas$date, format =  "%m/%d/%y")
-gas$doy = yday(gas$date)
+dat = read_csv('data/2020/data.2020.csv')
+dat$date = as.Date(dat$date, format =  "%m/%d/%y")
 
+tidy.dat.out2020 <- def.calc.sdg.conc(as.data.frame(dat)) %>%
+  filter(lake == 'TB' | lake == 'SSB')%>%
+  select(lake,date,depth,dissolvedCO2,dissolvedCH4)
+tidy.dat.out2020$date<- as.Date(tidy.dat.out2020$date, format =  "%m/%d/%y")
 
+sat.dat.out2020 <- def.calc.sdg.conc(as.data.frame(dat)) %>%
+  filter(lake == 'TB' | lake == 'SSB')%>%
+  select(lake,date,depth,barometricPressure,waterTemp, headspaceTemp, dissolvedCO2, concentrationCO2Air,dissolvedCH4, concentrationCH4Air, dissolvedN2O, concentrationN2OAir)
 
-gd <- gas %>% 
-  group_by(lake, date, depth, doy) %>% 
+#Gas Saturation
+dat.out.sat <- def.calc.sdg.sat(as.data.frame(sat.dat.out2020)) %>%
+  filter(lake == 'TB' | lake == 'SSB')%>%
+  select(lake,date,depth,waterTemp,satConcCO2,satConcCH4, CO2PercSat, CH4PercSat)
+dat.out.sat$date = as.Date(dat.out.sat$date, format =  "%m/%d/%y")
+gas.sat <- dat.out.sat %>% 
+  group_by(lake, date, depth) %>% 
+  summarise(
+    CO2persat = mean(CO2PercSat),
+    CH4persat = mean(CH4PercSat))
+
+gd <- tidy.dat.out2020 %>% 
+  group_by(lake, date, depth) %>% 
   summarise(
     CO2 = mean(dissolvedCO2),
     CH4 = mean(dissolvedCH4)
   )%>%
   mutate(icecovered = ifelse(month(date)%in% 1:4,"yes",
                              "no"))
-
-gd.2020<- gd%>%
-  filter(date <= as.POSIXct('2021-01-01'))
-
-summary2020<- gd.2020 %>%
-  group_by(lake, depth, icecovered)%>%
-  summarize(minCO2 = min(CO2)*1000000,
-            maxCO2 = max(CO2)*1000000,
-            minCH4 = min(CH4)*1000000,
-            maxCH4 = max(CH4)*1000000,
-            meanCO2 = mean(CO2)*1000000,
-            meanCH4 = mean(CH4)*1000000) 
-
-ssb.gas = read_csv('data/GC2021/SSB_GHG.csv')
-ssb.gas$date = as.Date(ssb.gas$sampledate, format =  "%m/%d/%y")
-ggplot(dplyr::filter(ssb.gas, lake == 'TB'| lake == 'SSB')) + 
-  geom_point(aes(x = CO2, y = depth, color = sampledate), size = 3) +
-  geom_path(aes(x = CO2, y = depth, group = sampledate, color = date)) +
-  facet_wrap(~lake) +
-  scale_y_reverse(name = "Depth (m)") +
-  scale_x_continuous(name = "dissolved CO2 gas (umol/L)", limits = c(0, 2000))+
-  scale_colour_viridis_c()+
-  theme_bw()+
-  theme(legend.position = "none")
 # CO2
-CO2<-ggplot(dplyr::filter(gd.2020, lake == 'TB'| lake == 'SSB')) + 
-  geom_point(aes(x = CO2*1000000, y = depth, color = doy, shape = icecovered),size = 3) +
-  geom_path(aes(x = CO2*1000000, y = depth, group = date, color = doy)) +
+CO2<-ggplot(dplyr::filter(gd, lake == 'TB'| lake == 'SSB')) + 
+  geom_point(aes(x = CO2*1000000, y = depth, color = month(date), shape = icecovered),size = 3) +
+  geom_path(aes(x = CO2*1000000, y = depth, group = date, color = month(date))) +
   facet_wrap(~lake) +
   scale_y_reverse(name = "Depth (m)") +
   scale_x_continuous(name = "dissolved CO2 gas (umol/L)", limits = c(0, 2000))+
@@ -60,13 +51,13 @@ CO2<-ggplot(dplyr::filter(gd.2020, lake == 'TB'| lake == 'SSB')) +
   theme(legend.position = "none")
 
 # CH4
-CH4<-ggplot(dplyr::filter(gd.2020, lake == 'TB'| lake == 'SSB')) + 
-  geom_point(aes(x = CH4*1000000, y = depth, color = doy, shape = icecovered),size = 3) +
-  geom_path(aes(x = CH4*1000000, y = depth, group = date, color = doy)) +
+CH4<-ggplot(dplyr::filter(gd, lake == 'TB'| lake == 'SSB')) + 
+  geom_point(aes(x = CH4*1000000, y = depth, color = month(date), shape = icecovered),size = 3) +
+  geom_path(aes(x = CH4*1000000, y = depth, group = date, color = month(date))) +
   facet_wrap(~lake) +
   scale_y_reverse(name = "Depth (m)") +
   scale_x_continuous(name = "dissolved CH4 gas (umol/L)")+
-  scale_colour_viridis_c(name = "Day of Year")+
+  scale_colour_viridis_c(name = "Month")+
   scale_shape_discrete(name = "Ice Covered")+
   theme_bw()+
   theme()
@@ -75,15 +66,15 @@ CH4<-ggplot(dplyr::filter(gd.2020, lake == 'TB'| lake == 'SSB')) +
 tempdo = read_csv('data/ChemTempDO/tempdo.csv')
 tempdo$date = as.Date(tempdo$Date, format =  "%m/%d/%y")
 tempdo<- tempdo%>%
+  filter(year(date) == "2020")%>%
   mutate(icecovered = ifelse(month(date)%in% 1:4,"yes",
                              "no"))
-tempdo2020 <- tempdo %>%
-  filter(date <= as.POSIXct('2021-01-01'))
+
 
 #Facet_Wrap by Date for Temperature and DO for Trout Bog
-Temp<-ggplot(dplyr::filter(tempdo2020, Bog == 'TB' | Bog == 'SSB')) + 
-  geom_point(aes(x = waterTemp, y = Depth, color = date, shape = icecovered), size = 2) +
-  geom_path(aes(x = waterTemp, y = Depth, color = date, group = date))+
+Temp<-ggplot(dplyr::filter(tempdo, Bog == 'TB' | Bog == 'SSB')) + 
+  geom_point(aes(x = waterTemp, y = Depth, color = month(date), shape = icecovered), size = 1.5) +
+  geom_path(aes(x = waterTemp, y = Depth, color = month(date), group = date))+
   facet_wrap(~Bog) +
   scale_y_reverse(name = "Depth (m)") +
   scale_x_continuous(name = "Temperature (C)")+
@@ -91,8 +82,8 @@ Temp<-ggplot(dplyr::filter(tempdo2020, Bog == 'TB' | Bog == 'SSB')) +
   theme_bw()+
   theme(legend.position = "none")
 
-O2<-ggplot(dplyr::filter(tempdo2020, Bog == 'TB' | Bog == 'SSB')) + 
-  geom_point(aes(x = DO, y = Depth, color = month(date), shape = icecovered), size = 2) +
+O2<-ggplot(dplyr::filter(tempdo, Bog == 'TB' | Bog == 'SSB')) + 
+  geom_point(aes(x = DO, y = Depth, color = month(date), shape = icecovered), size = 1.5) +
   geom_path(aes(x = DO, y = Depth, color = month(date), group = date))+
   facet_wrap(~Bog) +
   scale_y_reverse(name = "Depth (m)") +
@@ -101,9 +92,9 @@ O2<-ggplot(dplyr::filter(tempdo2020, Bog == 'TB' | Bog == 'SSB')) +
   theme_bw()+
   theme(legend.position = "none")
 
-figure<-(CO2 + CH4 + Temp + O2) + plot_layout(guides = "collect", ncol = 2)
+figure2020<-(CO2 + CH4 + Temp + O2) + plot_layout(guides = "collect", ncol = 2)
 
-ggsave("figures/Profiles2020color.png", width = 10, height = 6, units = 'in', figure)
+ggsave("figures/2020/Profiles.png", width = 10, height = 6, units = 'in', figure2020)
 
 # Heat map 
 heatmap = read_csv('data/GC2021/fullheat.csv')
