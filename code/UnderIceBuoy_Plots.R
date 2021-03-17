@@ -28,15 +28,16 @@ chl1/chl2
 ggsave('SparklingBogChl.png',width = 7, height = 5)
 
 ################## DO Sensor ##################
-do.2019 = read_csv('data/SB_2018-2019_underice_DO_import.csv')
+do.2019 = read_csv('data/Buoy/DO/SB_2018-2019_underice_DO_import.csv')
 doHour.2019 = do.2019 %>% group_by(CT.Date = floor_date(`Central Standard Time`, "1 hour")) %>%
   summarize(DO.mgL = mean(`Dissolved Oxygen`), DO.Sat = mean(`Dissolved Oxygen Saturation`), T.degC = mean(Temperature))
 
 
-do.2020 = list.files(path='data/DO/', full.names = TRUE) %>%
+do.2020 = list.files(path='data/Buoy/DO/', full.names = TRUE) %>%
   lapply(read_csv, skip = 2) %>%
   bind_rows %>%
   mutate(CT.Date = as.POSIXct(`Time (sec)`, origin = '1970-01-01'))
+do.2020<- do.2020[,c(1:5, 14)]
 names(do.2020) = c('Time.s', 'Bat.V','T.degC','DO.mgL','Gain','CT.Date')
 doHour.2020 = do.2020 %>% group_by(CT.Date = floor_date(CT.Date, "1 hour")) %>%
   summarize(DO.mgL = mean(DO.mgL), T.degC = mean(T.degC))
