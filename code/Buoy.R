@@ -82,3 +82,35 @@ tempheat<-ggplot(f2) +
   scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b %y"),
                limits = c(as.Date(paste0(2019,'-12-15')), as.Date(paste0(2020,'-10-26'))))
 
+################## DO Sensor ##################
+do.2019 = read_csv('data/SB_2018-2019_underice_DO_import.csv')
+doHour.2019 = do.2019 %>% group_by(CT.Date = floor_date(`Central Standard Time`, "1 hour")) %>%
+  summarize(DO.mgL = mean(`Dissolved Oxygen`), DO.Sat = mean(`Dissolved Oxygen Saturation`), T.degC = mean(Temperature))
+
+
+do.2020 = list.files(path='data/DO/', full.names = TRUE) %>%
+  lapply(read_csv, skip = 2) %>%
+  bind_rows %>%
+  mutate(CT.Date = as.POSIXct(`Time (sec)`, origin = '1970-01-01'))
+names(do.2020) = c('Time.s', 'Bat.V','T.degC','DO.mgL','Gain','CT.Date')
+doHour.2020 = do.2020 %>% group_by(CT.Date = floor_date(CT.Date, "1 hour")) %>%
+  summarize(DO.mgL = mean(DO.mgL), T.degC = mean(T.degC))
+
+
+p.do = ggplot(doHour.2019) + geom_line(aes(x = CT.Date, y = DO.mgL, color = '2019')) +
+  geom_line(data = doHour.2020, aes(x = CT.Date - 365*24*60*60, y = DO.mgL, color = '2020')) +
+  theme_bw() +
+  scale_color_manual(name = 'Year', values = c('lightblue4','gold')) +
+  labs(title = 'Sparkling Bog 2019-2020') + ylab('DO (mg/L)') + xlab('Date') +
+  # ylim(c(0,1)) +
+  NULL
+
+p.temp = ggplot(doHour.2019) + geom_line(aes(x = CT.Date, y = T.degC, color = '2019')) +
+  geom_line(data = doHour.2020, aes(x = CT.Date - 365*24*60*60, y = T.degC, color = '2020')) +
+  theme_bw() +
+  scale_color_manual(name = 'Year',values = c('lightblue4','gold')) +
+  labs(title = 'Sparkling Bog 2019-2020') + ylab('Temp (degC)') + xlab('Date') +
+  ylim(c(0,10))
+
+p.do/p.temp
+ggsave('SparklingBogTemp.png',width = 7, height = 5)
