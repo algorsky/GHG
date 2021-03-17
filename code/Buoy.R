@@ -102,6 +102,10 @@ ggplot(doHour.2020) +
   scale_x_date(breaks = "1 month", minor_breaks = "1 month", labels=date_format("%b"),
                limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2020,'-04-01'))))
 
+ggplot(data = dplyr::filter(doHour.2020, CT.Date > '2020-01-01' & CT.Date < "2020-04-01"))+ 
+  geom_point(aes(x = T.degC, y = DO.mgL))+
+  ylim(0.14,0.19)
+
 
 p.temp = ggplot(doHour.2019) + geom_line(aes(x = CT.Date, y = T.degC, color = '2019')) +
   geom_line(data = doHour.2020, aes(x = CT.Date - 365*24*60*60, y = T.degC, color = '2020')) +
