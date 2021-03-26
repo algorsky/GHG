@@ -200,3 +200,15 @@ ggplot(day)+
   theme_bw()
 
 
+#Oxygen and CO2
+do.2020.summer = read_csv('data/Buoy/DO/SSB_2020_summer_DO.csv')
+doHour.2020.summer = do.2020.summer %>% group_by(CT.Date = floor_date(`Central Standard Time`, "1 hour")) %>%
+  summarize(DO.mgL = mean(`Dissolved Oxygen`), DO.Sat = mean(`Dissolved Oxygen Saturation`), T.degC = mean(Temperature))
+
+ggplot()+
+  geom_point(data = fluxSSBCO2, aes(x = date, y = co2_flux, color = "South Sparkling Bog"), size = 0.05)+
+  geom_vline(xintercept = as.numeric(as.Date("2020-04-28")),  linetype = "dashed", color = "black")+
+  geom_hline(yintercept = 0, color = "black", alpha = 0.4)+
+  xlab("")+
+  ylab("CO2 Flux (µmol m-2 s-1)")+
+  theme(legend)
