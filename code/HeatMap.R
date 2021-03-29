@@ -89,7 +89,7 @@ CH4SSB<-ggplot(f2SSB) +
 CH4TB<-ggplot(f2TB) +
   guides(fill = guide_colorsteps(barheight = unit(4, "cm"))) +
   geom_contour_filled(aes(x = sampledate, y = depth, z = var)) +
-  geom_point(data = heatmapSSB, aes(x = sampledate, y = depth), size = 0.25, color = 'white') +
+  geom_point(data = heatmapTBCO2, aes(x = sampledate, y = depth), size = 0.25, color = 'white') +
   scale_y_reverse()  +
   scale_color_viridis_c(name = var) +
   ylab('depth') + xlab('') +
@@ -100,3 +100,58 @@ CH4TB<-ggplot(f2TB) +
 
 heatch4patch<-(CH4SSB + CH4TB) + plot_layout(guides = "collect", ncol = 1)
 ggsave("figures/HeatCombo_CH4.png", width = 10, height = 6, units = 'in', heatch4patch)
+
+
+#CO2
+heatmapTBCO2<-heatmap%>%
+  filter(lake == "TB")%>%
+  mutate(sampledate = date)%>%
+  mutate(co2unit = CO2*1000000)%>%
+  ungroup()%>%
+  select(sampledate, depth, co2unit)
+
+#Function
+# Vertical linear interpolation of water column concentrations 
+interpData <- function(observationDF, date, maxdepth) {
+  a = observationDF %>% filter(sampledate == date)
+  if (sum(!is.na(a$co2unit)) == 0) {
+    print('nothing')
+    return(NULL)
+  }
+  
+  b = a %>% filter(!is.na(co2unit))
+  if (max(b$depth) < (maxdepth/2)) {
+    print('too shallow')
+    return(NULL)
+  }
+  
+  yout = approx(x = a$depth, y = a$co2unit, xout = c(0:maxdepth), rule = 2)
+  return(yout$y)
+}
+
+maxdepth = 7 # Should be depth of lowest sample, not necessarily depth of lake 
+usedatesSSB = heatmapSSB %>%
+  dplyr::distinct(sampledate) 
+usedatesTB = heatmapTBCO2 %>%
+  dplyr::distinct(sampledate)
+
+fSSB <- lapply(X = usedatesSSB$sampledate, FUN = interpData, observationDF = heatmapSSB,
+               maxdepth = maxdepth)
+fSSB = as.data.frame(do.call(cbind, fSSB))
+names(fSSB) = usedatesSSB$sampledate
+
+fTB <- lapply(X = usedatesTB$sampledate, FUN = interpData, observationDF = heatmapTBCO2,
+              maxdepth = maxdepth)
+fTB = as.data.frame(do.call(cbind, fTB))
+names(fTB) = usedatesTB$sampledate
+
+# Bind list into dataframe
+f2SSB = bind_cols(depth = 0:maxdepth,fSSB) %>%
+  pivot_longer(-1, names_to = 'sampledate', values_to = 'var') %>%
+  arrange(sampledate,depth) %>%
+  mutate(sampledate = as.Date(sampledate))
+f2TB = bind_cols(depth = 0:maxdepth,fTB) %>%
+  pivot_longer(-1, names_to = 'sampledate', values_to = 'var') %>%
+  arrange(sampledate,depth) %>%
+  mutate(sampledate = as.Date(sampledate))
+
