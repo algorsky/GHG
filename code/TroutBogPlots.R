@@ -90,7 +90,7 @@ CH4<-ggplot(f2TBch4) +
   labs(fill = ((expression(paste("C", H[4], " (", mu,"mol ", L^-1,")")))))+
   theme_bw(base_size = 8) +
   scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b, %Y"),
-               limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2021,'-1-15'))))
+               limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2020,'-10-31'))))
 
 #Heat Map CO2
 CO2<-ggplot(f2TBco2) +
@@ -103,7 +103,7 @@ CO2<-ggplot(f2TBco2) +
   labs(fill = ((expression(paste("C", O[2], " (", mu,"mol ", L^-1,")")))))+
   theme_bw(base_size = 8) +
   scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b, %Y"),
-               limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2021,'-1-15'))))
+               limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2020,'-10-31'))))
 
 gas<- (CH4 + CO2) + plot_layout(guides = "collect", ncol = 1)
 ggsave("figures/HeatMap_TB.png", width = 10, height = 6, units = 'in', gas)
@@ -116,7 +116,7 @@ tempdoTB <- tempdo%>%
   select(sampledate, depth, waterTemp)
 
 tempAnnual <- tempdoTB %>%
-  filter(date <= as.POSIXct("2021-01-01"))
+  filter(sampledate <= as.POSIXct('2021-01-01'))
 
 interpDataTemp <- function(observationDF, date, maxdepth) {
   a = observationDF %>% filter(sampledate == date)
@@ -136,13 +136,13 @@ interpDataTemp <- function(observationDF, date, maxdepth) {
 }
 
 maxdepth = 7 # Should be depth of lowest sample, not necessarily depth of lake 
-usedatesTemp = tempdoTB %>%
+usedatesTemp = tempAnnual %>%
   dplyr::distinct(sampledate)
 
-fTBTemp <- lapply(X = usedatesTemp$sampledate, FUN = interpDataTemp, observationDF = tempdoTB,
+fTBTemp <- lapply(X = usedatesTemp$sampledate, FUN = interpDataTemp, observationDF = tempAnnual,
                  maxdepth = maxdepth)
 fTBTemp = as.data.frame(do.call(cbind, fTBTemp))
-names(fTBTemp) = usedatesTB$sampledate
+names(fTBTemp) = usedatesTemp$sampledate
 
 # Bind list into dataframe
 f2TBTemp = bind_cols(depth = 0:maxdepth,fTBTemp) %>%
@@ -151,14 +151,17 @@ f2TBTemp = bind_cols(depth = 0:maxdepth,fTBTemp) %>%
   mutate(sampledate = as.Date(sampledate))
 
 # Heat map 
-ggplot(f2TBTemp) +
+temp<-ggplot(f2TBTemp) +
   guides(fill = guide_colorsteps(barheight = unit(4, "cm"))) +
   geom_contour_filled(aes(x = sampledate, y = depth, z = var)) +
-  geom_point(data = tempdoTB, aes(x = sampledate, y = depth), size = 0.25, color = 'white') +
+  geom_point(data = tempAnnual, aes(x = sampledate, y = depth), size = 0.25, color = 'white') +
   scale_y_reverse()  +
   scale_color_viridis_c(name = var) +
   ylab('Depth (m)') + xlab('') +
   labs(fill = ((expression(paste("Temperature (C)")))))+
   theme_bw(base_size = 8) +
   scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b, %Y"),
-               limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2021,'-1-15'))))
+               limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2020,'-10-31'))))
+
+heatmaps<- (temp + CH4 + CO2) + plot_layout(guides = "collect", ncol = 1)
+ggsave("figures/HeatMap_TB.png", width = 10, height = 6, units = 'in', gas)
