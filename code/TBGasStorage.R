@@ -27,6 +27,23 @@ storageTB = gasweighted %>%
             co2mass = mean(CO2Mass), 
             doy = mean(doy))
 
+spring<- storageTB %>%
+  filter(date == as.POSIXct("2020-03-07")|date == as.POSIXct("2020-05-04"))%>%
+  mutate(ch4SA = (ch4mass * 61693.5)/10983)%>%
+  mutate(co2SA = (co2mass * 61693.5)/10983)
+
+ch4vol_iceoff = 277.1684 - 214.5911
+co2vol_iceoff = 3677.656 - 2359.088
+
+fall<- storageTB %>%
+  filter(date == as.POSIXct("2020-10-05")|date == as.POSIXct("2020-10-30"))%>%
+  mutate(ch4SA = (ch4mass * 61693.5)/10983)%>%
+  mutate(co2SA = (co2mass * 61693.5)/10983)
+
+ch4vol_fall = 481.3385 - 264.8943
+co2vol_iceoff = 3067.311 - 2400.751
+
+
 #Higher estimate
 gashigh<- bathjoin%>%
   mutate(multipliedCH4Vol = highvolume * (CH4*1000000)) %>%
@@ -56,7 +73,20 @@ estimate<-ggplot()+
     caption = 'Figure: Method comparison for calculating volumetric weight of gas. Red represents methane and blue represents carbon dioxide.',
     theme = theme(plot.caption = element_text( hjust = 0, size = 10)))
 
+storage<-ggplot(dplyr::filter(storageTB, date < as.POSIXct('2021-01-01')))+
+  geom_point(aes(x = date, y = ch4mass), color = "red")+
+  geom_point(aes(x = date, y = co2mass), color = "blue")+
+  labs(color = "Gas")+
+  xlab("")+
+  ylab(expression(paste("Volume Weighted Gas Storage (",  mu,"mol ", L^-1,")")))+
+  theme_bw()+
+  annotate("rect", xmin = as.Date(paste0(2020,'-03-07')), xmax = as.Date(paste0(2020,'-05-04')), ymin = -1, ymax = 900, alpha = 0.1)+
+  annotate("rect", xmin = as.Date(paste0(2020,'-10-05')), xmax = as.Date(paste0(2020,'-10-30')), ymin = -1, ymax = 900, alpha = 0.1)+
+  plot_annotation(
+    caption = 'Figure: Volumetric weight of Gas Storage. Red = methane and blue = carbon dioxide.',
+    theme = theme(plot.caption = element_text( hjust = 0, size = 10)))
 
+ggsave("figures/storage.png", width = 10, height = 6, units = 'in', storage)
 ggsave("figures/methodweight.png", width = 10, height = 6, units = 'in', estimate)
 
 annual<- gasweighted %>%
