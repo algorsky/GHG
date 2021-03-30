@@ -17,7 +17,8 @@ heatmapTB<-heatmap%>%
   mutate(ch4unit = CH4*1000000)%>%
   mutate(co2unit = CO2*1000000)%>%
   ungroup()%>%
-  select(sampledate, depth, ch4unit, co2unit)
+  select(sampledate, depth, ch4unit, co2unit)%>%
+  filter(sampledate <= as.POSIXct('2021-01-01'))
 
 #Function CH4
 interpDataCH4 <- function(observationDF, date, maxdepth) {
@@ -61,6 +62,7 @@ usedatesTB = heatmapTB %>%
 
 fTBch4 <- lapply(X = usedatesTB$sampledate, FUN = interpDataCH4, observationDF = heatmapTB,
               maxdepth = maxdepth)
+ 
 fTBch4 = as.data.frame(do.call(cbind, fTBch4))
 names(fTBch4) = usedatesTB$sampledate
 
@@ -163,5 +165,59 @@ temp<-ggplot(f2TBTemp) +
   scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b, %Y"),
                limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2020,'-10-31'))))
 
-heatmaps<- (temp + CH4 + CO2) + plot_layout(guides = "collect", ncol = 1)
-ggsave("figures/HeatMap_TB.png", width = 10, height = 6, units = 'in', gas)
+#DO
+DO_TB <- tempdo%>%
+  mutate(sampledate = date)%>%
+  select(sampledate, depth, DO)%>%
+  filter(!is.na(DO))
+
+DOAnnual <- DO_TB %>%
+  filter(sampledate <= as.POSIXct('2021-01-01'))
+
+interpDataDO <- function(observationDF, date, maxdepth) {
+  a = observationDF %>% filter(sampledate == date)
+  if (sum(!is.na(a$DO)) == 0) {
+    print('nothing')
+    return(NULL)
+  }
+  
+  b = a %>% filter(!is.na(DO))
+  if (max(b$depth) < (maxdepth/2)) {
+    print('too shallow')
+    return(NULL)
+  }
+  
+  yout = approx(x = a$depth, y = a$DO, xout = c(0:maxdepth), rule = 2)
+  return(yout$y)
+}
+
+maxdepth = 7 # Should be depth of lowest sample, not necessarily depth of lake 
+usedatesDO = DOAnnual %>%
+  dplyr::distinct(sampledate)
+
+fTBDO <- lapply(X = usedatesDO$sampledate, FUN = interpDataDO, observationDF = DOAnnual,
+                  maxdepth = maxdepth)
+fTBDO = as.data.frame(do.call(cbind, fTBDO))
+names(fTBDO) = usedatesDO$sampledate
+
+# Bind list into dataframe
+f2TBDO = bind_cols(depth = 0:maxdepth,fTBDO) %>%
+  pivot_longer(-1, names_to = 'sampledate', values_to = 'var') %>%
+  arrange(sampledate,depth) %>%
+  mutate(sampledate = as.Date(sampledate))
+
+# Heat map 
+O2<-ggplot(f2TBDO) +
+  guides(fill = guide_colorsteps(barheight = unit(4, "cm"))) +
+  geom_contour_filled(aes(x = sampledate, y = depth, z = var)) +
+  geom_point(data = DOAnnual, aes(x = sampledate, y = depth), size = 0.25, color = 'white') +
+  scale_y_reverse()  +
+  scale_color_viridis_c(name = var) +
+  ylab('Depth (m)') + xlab('') +
+  labs(fill = ((expression(paste(O[2], " (", mu,"mol ", L^-1,")")))))+
+  theme_bw(base_size = 8) +
+  scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b, %Y"),
+               limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2020,'-10-31'))))
+
+heatmaps<- (temp+ O2+ CH4 + CO2) + plot_layout(guides = "collect", ncol = 1)
+ggsave("figures/Full_HeatMap_TB.png", width = 12, height = 10, units = 'in', heatmaps)
