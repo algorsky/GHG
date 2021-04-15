@@ -90,7 +90,7 @@ CH4<-ggplot(f2TBch4) +
   scale_color_viridis_c(name = var) +
   ylab('Depth (m)') + xlab('') +
   labs(fill = ((expression(paste("C", H[4], " (", mu,"mol ", L^-1,")")))))+
-  theme_bw(base_size = 8) +
+  theme_bw(base_size = 10) +
   scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b, %Y"),
                limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2020,'-10-31'))))
 
@@ -103,7 +103,7 @@ CO2<-ggplot(f2TBco2) +
   scale_color_viridis_c(name = var) +
   ylab('Depth (m)') + xlab('') +
   labs(fill = ((expression(paste("C", O[2], " (", mu,"mol ", L^-1,")")))))+
-  theme_bw(base_size = 8) +
+  theme_bw(base_size = 10) +
   scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b, %Y"),
                limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2020,'-10-31'))))
 
@@ -161,7 +161,7 @@ temp<-ggplot(f2TBTemp) +
   scale_color_viridis_c(name = var) +
   ylab('Depth (m)') + xlab('') +
   labs(fill = ((expression(paste("Temperature (C)")))))+
-  theme_bw(base_size = 8) +
+  theme_bw(base_size = 10) +
   scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b, %Y"),
                limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2020,'-10-31'))))
 
@@ -215,9 +215,9 @@ O2<-ggplot(f2TBDO) +
   scale_color_viridis_c(name = var) +
   ylab('Depth (m)') + xlab('') +
   labs(fill = ((expression(paste(O[2], " (", mu,"mol ", L^-1,")")))))+
-  theme_bw(base_size = 8) +
+  theme_bw(base_size = 10) +
   scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b, %Y"),
                limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2020,'-10-31'))))
 
 heatmaps<- (temp+ O2+ CH4 + CO2) + plot_layout(guides = "collect", ncol = 1)
-ggsave("figures/Full_HeatMap_TB.png", width = 12, height = 10, units = 'in', heatmaps)
+ggsave("figures/Full_HeatMap_TB.png", width = 14, height = 9, units = 'in', heatmaps)
