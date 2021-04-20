@@ -1,0 +1,11 @@
+Lake	Deployment Year	Season	Deployment Date	Retrieve Year	RetrieveSeason	Retrieve Date	Sensor	Serial Number	Data Interval	Depth	Comments		
+
+SB	2020	Winter	10/27/2020	2021	Spring	4/13/2021	Hobo Temp/Light 1	20472265	10 min	0	from top light sensor, top light sensor at 73cm
+SB	2020	Winter	10/27/2020	2021	Spring	4/13/2021	Hobo Temp/Light 2	20472264	10 min	50	
+SB	2020	Winter	10/27/2020	2021	Spring	4/13/2021	Hobo Temp/Light 3	20472262	10 min	75	
+SB	2020	Winter	10/27/2020	2021	Spring	4/13/2021	Hobo Temp/Light 4	20472263	10 min	125	
+SB	2020	Winter	10/27/2020	2021	Spring	4/13/2021	Hobo Temp/Light 5	20472268	10 min	225	
+SB	2020	Winter	10/27/2020	2021	Spring	4/13/2021	Hobo Temp/Light 6	20472266	10 min	375	
+SB	2020	Winter	10/27/2020	2021	Spring	4/13/2021	Hobo Temp/Light 7	20472261	10 min	675	
+SB	2020	Winter	10/27/2020	2021	Spring	4/13/2021	PME MiniDot	570653	1 min	63	
+SB	2020	Winter	10/27/2020	2021	Spring	4/13/2021	PME Wiper DO	471313	6 hr	63	

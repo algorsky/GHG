@@ -77,14 +77,37 @@ tempdo$date = as.Date(tempdo$Date, format =  "%m/%d/%y")
 tempdo<- tempdo%>%
   mutate(icecovered = ifelse(month(date)%in% 1:4,"yes",
                              "no"))
+
+tempdowinter<- tempdo%>%
+  filter(month(date)%in% 1:4)%>%
+  mutate(Year = year(date))
+
+ssbwinter<-ggplot(dplyr::filter(tempdowinter, Bog == 'SSB')) + 
+  geom_point(aes(x = DO, y = Depth, color = factor(Year)), size = 5) +
+  geom_path(aes(x = DO, y = Depth, color = factor(Year), group = date))+
+  scale_y_reverse(name = "Depth (m)") +
+  scale_x_continuous(name = "DO (mg/L)")+
+  theme_bw(base_size = 20)+
+  theme(legend.title = element_blank())
+
+tbwinter<-ggplot(dplyr::filter(tempdowinter, Bog == 'TB')) + 
+  geom_point(aes(x = DO, y = Depth, color = factor(Year)), size = 5) +
+  geom_path(aes(x = DO, y = Depth, color = factor(Year), group = date))+
+  scale_y_reverse(name = "Depth (m)") +
+  scale_x_continuous(name = "DO (mg/L)")+
+  theme_bw(base_size = 20)+
+  theme(legend.title = element_blank())
+
+
+  
 tempdo2020 <- tempdo %>%
   filter(date <= as.POSIXct('2021-01-01'))
 
 #Facet_Wrap by Date for Temperature and DO for Trout Bog
-Temp<-ggplot(dplyr::filter(tempdo2020, Bog == 'TB' | Bog == 'SSB')) + 
+Temp<-ggplot(dplyr::filter(tempdo, Bog == 'SSB')) + 
   geom_point(aes(x = waterTemp, y = Depth, color = date, shape = icecovered), size = 2) +
   geom_path(aes(x = waterTemp, y = Depth, color = date, group = date))+
-  facet_wrap(~Bog) +
+  facet_wrap(~year(tempdo$date)) +
   scale_y_reverse(name = "Depth (m)") +
   scale_x_continuous(name = "Temperature (C)")+
   scale_colour_viridis_c()+

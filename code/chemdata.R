@@ -6,6 +6,9 @@ library(lubridate)
 data = read_csv('data/ChemTempDO/chemcarbon.csv')
 data$Date = as.Date(data$Date, format =  "%m/%d/%y")
 
+winter<- data %>%
+  filter()
+
 #DOC
 ggplot(dplyr::filter(data, lakeid == 'TB' | lakeid == 'SSB'))+
   geom_point(aes(x = Date, y = DOC, color = Depth))+

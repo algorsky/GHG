@@ -7,7 +7,7 @@ library(scales)
 ################## Temp/Light Sensor ##################
 buoy.2020 = read_csv('data/Buoy/temp.buoy2020.csv')
 buoy.2020<- buoy.2020%>%
-  mutate(sampledate = as.Date(Date.GMT))
+  mutate(sampledate = ymd_hms("2009-08-07 00:00:01", tz = "America/New_York"))
 
 #Plotting Temperature
 buoy.temp2020<-ggplot(buoy.2020) +

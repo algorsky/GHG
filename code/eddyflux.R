@@ -49,36 +49,40 @@ fluxTBCO2<-qcTBCO2%>%
   filter(co2_flux > -10 & co2_flux < 10)
 fluxTBCO2$date<- as.Date(fluxTBCO2$date, format = "%m/%d/%y")
 
-ch4median<- fluxSSBCH4%>%
+TBch4mean<- fluxTBCH4%>%
   group_by(date)%>%
-  summarise(median = median(ch4_flux))
-ch4median$doy = yday(ch4median$date)
+  summarise(mean = mean(ch4_flux))%>%
+  filter(mean*1000 > -10)
 
-ggplot(data = ch4median)+
-  geom_point(aes(x = doy, y = median))
+TBco2mean<- fluxTBCO2%>%
+  group_by(date)%>%
+  summarise(mean = mean(co2_flux))%>%
+  filter(mean > -2.5)
 
 
 #CH4 Flux (µmol m-2 s-1)
 ch4<-ggplot()+
-  geom_point(data = fluxSSBCH4, aes(x = date, y = ch4_flux), size = 0.05, color = "blue")+
-  geom_point(data = fluxTBCH4, aes(x = date, y = ch4_flux), size = 0.05, color = "red")+
-  geom_vline(xintercept = as.numeric(as.Date("2020-04-28")),  linetype = "dashed", color = "black")+
+  geom_point(data = fluxTBCH4, aes(x = date, y = ch4_flux *1000), size = 0.05, color = "gray", alpha = 0.5)+
+  geom_point(data = TBch4mean, aes( x = date, y = mean*1000), size = 0.9, color = "red2")+
+  geom_vline(xintercept = as.numeric(as.Date("2020-04-26")),  linetype = "dashed", color = "black")+
   geom_hline(yintercept = 0, color = "black", alpha = 0.4)+
   xlab("")+
-  ylab("CH4 Flux (µmol m-2 s-1)")+
+  scale_y_continuous(limits = c(-20, 40), breaks = seq(-20, 40, 10))+
+  scale_x_date(date_labels="%b", date_breaks  ="1 month")+
+  ylab(expression(paste("C", H[4], " flux (", n,"mol ", m^-2, s^-1,")")))+
   theme_bw()
 
-
-colours <- c("South Sparkling Bog" = "blue", "Trout Bog" = "red")
-theme_set(theme_bw())
 co2<- ggplot()+
-  geom_point(data = fluxSSBCO2, aes(x = date, y = co2_flux, color = "South Sparkling Bog"), size = 0.05)+
-  geom_point(data = fluxTBCO2, aes(x = date, y = co2_flux, color = "Trout Bog"), size = 0.05)+
-  geom_vline(xintercept = as.numeric(as.Date("2020-04-28")),  linetype = "dashed", color = "black")+
+  geom_point(data = fluxTBCO2, aes(x = date, y = co2_flux), size = 0.05, color = "gray", alpha = 0.5)+
+  geom_point(data = TBco2mean, aes(x = date, y = mean), color = "turquoise4", size = 0.75)+
+  geom_vline(xintercept = as.numeric(as.Date("2020-04-26")),  linetype = "dashed", color = "black")+
   geom_hline(yintercept = 0, color = "black", alpha = 0.4)+
+  scale_y_continuous(limits = c(-5, 5), breaks = seq(-5, 5, 2))+
   xlab("")+
   ylab("CO2 Flux (µmol m-2 s-1)")+
-  scale_color_manual(values = colours)+
+  ylab(expression(paste("C", O[2], " flux (", µ,"mol ", m^-2, s^-1,")")))+
+  scale_x_date(date_labels="%b", date_breaks  ="1 month")+
+  theme_bw()+
   theme(legend.position = "bottom", legend.title = element_blank())
 
 buoy = read_csv('data/Buoy/temp.buoy2020.csv')
@@ -108,13 +112,13 @@ tempgap<- ggplot()+
   theme(legend.position = "top", legend.title = element_blank())
   
   
-tempgas<-tempgap/ch4/co2 + plot_layout(ncol = 1)  
+gas<-ch4/co2 + plot_layout(ncol = 1)  
   
 #plot_annotation(
   #caption = 'Figure: Timeseries of a) air/water temperature, b) methane flux (umol/m2/s) and c) carbon dioxide flux (umol/m2/s) from South Sparkling Bog (blue) and Trout Bog (red) with the dashed line representing ice-off.',
  # theme = theme(plot.caption = element_text( hjust = 0, size = 10)))
 
-ggsave("figures/eddyco.png", width = 10, height = 6, units = 'in', tempgas)
+ggsave("figures/flux.png", width = 8, height = 6, units = 'in', gas)
 
 
 #CH4, CO2 and Temp SSB

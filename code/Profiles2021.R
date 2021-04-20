@@ -22,7 +22,8 @@ gd <- gas %>%
   summarise(
     CO2 = mean(dissolvedCO2*1000000),
     CH4 = mean(dissolvedCH4*1000000)
-  )
+  ) %>%
+  mutate(Year = factor(year))
 
 
 summary2021<- gd %>%
@@ -36,25 +37,25 @@ summary2021<- gd %>%
 
 # CO2
 CO2<-ggplot(dplyr::filter(gd, lake == 'TB'| lake == 'SSB')) + 
-  geom_point(aes(x = CO2, y = depth, shape = year),size = 5) +
-  geom_path(aes(x = CO2, y = depth, group = date)) +
+  geom_point(aes(x = CO2, y = depth, shape = Year, color = Year),size = 5) +
+  geom_path(aes(x = CO2, y = depth, group = date, color = Year)) +
   facet_wrap(~lake) +
   scale_y_reverse(name = "Depth (m)") +
   scale_x_continuous(name = ((expression(paste("C", O[2], " (", mu,"mol ", L^-1,")")))), limits = c(0, 2000))+
-  scale_colour_viridis_c()+
+  scale_color_manual(values = c('lightblue4','gold')) +
   theme_bw(base_size = 20)+
   theme(legend.position = "none")
 
 # CH4
 CH4<-ggplot(dplyr::filter(gd, lake == 'TB'| lake == 'SSB')) + 
-  geom_point(aes(x = CH4, y = depth, shape = year),size = 5) +
-  geom_path(aes(x = CH4, y = depth, group = date)) +
+  geom_point(aes(x = CH4, y = depth, color = Year, shape = Year),size = 5) +
+  geom_path(aes(x = CH4, y = depth, group = date, color = Year)) +
   facet_wrap(~lake) +
   scale_y_reverse(name = "Depth (m)") +
   scale_x_continuous(name = ((expression(paste("C", H[4], " (", mu,"mol ", L^-1,")")))))+
   scale_shape_discrete(name = "")+
-  theme_bw(base_size = 20)+
-  theme()
+  scale_color_manual(values = c('lightblue4','gold')) +
+  theme_bw(base_size = 20)
 
 # Read in data 
 tempdo = read_csv('data/ChemTempDO/tempdo.csv')

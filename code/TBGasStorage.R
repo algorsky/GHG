@@ -60,13 +60,13 @@ storageHigh = gashigh %>%
             co2mass = mean(CO2Mass), 
             doy = mean(doy))
 estimate<-ggplot()+
-  geom_point(data = storageTB, aes(x = date, y = ch4mass), color = "red")+
-  geom_point(data = storageTB, aes(x = date, y = co2mass), color = "blue")+
+  geom_point(data = storageTB, aes(x = date, y = ch4mass), color = "red2")+
+  geom_point(data = storageTB, aes(x = date, y = co2mass), color = "turquoise4")+
   geom_point(data = storageHigh, aes(x = date, y = ch4mass))+
   geom_point(data = storageHigh, aes(x = date, y = co2mass))+
   xlab("")+
   ylab(expression(paste("Volume Weighted Gas Storage (",  mu,"mol ", L^-1,")")))+
-  theme_bw()+
+  theme_bw(base_size = 20)+
   annotate("rect", xmin = as.Date(paste0(2020,'-03-07')), xmax = as.Date(paste0(2020,'-05-04')), ymin = -1, ymax = 900, alpha = 0.1)+
   annotate("rect", xmin = as.Date(paste0(2020,'-10-05')), xmax = as.Date(paste0(2020,'-10-30')), ymin = -1, ymax = 900, alpha = 0.1)+
   plot_annotation(
@@ -74,19 +74,19 @@ estimate<-ggplot()+
     theme = theme(plot.caption = element_text( hjust = 0, size = 10)))
 
 storage<-ggplot(dplyr::filter(storageTB, date < as.POSIXct('2021-01-01')))+
-  geom_point(aes(x = date, y = ch4mass), color = "red")+
-  geom_point(aes(x = date, y = co2mass), color = "blue")+
+  geom_point(aes(x = date, y = ch4mass), size = 3, color = "red2")+
+  geom_point(aes(x = date, y = co2mass), size = 3, color = "turquoise4")+
   labs(color = "Gas")+
   xlab("")+
   ylab(expression(paste("Volume Weighted Gas Storage (",  mu,"mol ", L^-1,")")))+
-  theme_bw()+
+  theme_bw(base_size = 20)+
   annotate("rect", xmin = as.Date(paste0(2020,'-03-07')), xmax = as.Date(paste0(2020,'-05-04')), ymin = -1, ymax = 900, alpha = 0.1)+
-  annotate("rect", xmin = as.Date(paste0(2020,'-10-05')), xmax = as.Date(paste0(2020,'-10-30')), ymin = -1, ymax = 900, alpha = 0.1)+
-  plot_annotation(
-    caption = 'Figure: Volumetric weight of Gas Storage. Red = methane and blue = carbon dioxide.',
-    theme = theme(plot.caption = element_text( hjust = 0, size = 10)))
+  annotate("rect", xmin = as.Date(paste0(2020,'-10-05')), xmax = as.Date(paste0(2020,'-10-30')), ymin = -1, ymax = 900, alpha = 0.1)
+ # plot_annotation(
+   # caption = 'Volumetric Weight of Gas Storage: Red = Methane and Blue = Carbon dioxide',
+   # theme = theme(plot.caption = element_text( hjust = 0, size = 18)))
 
-ggsave("figures/storage.png", width = 10, height = 6, units = 'in', storage)
+ggsave("figures/storage.png", width = 8, height = 8, units = 'in', storage)
 ggsave("figures/methodweight.png", width = 10, height = 6, units = 'in', estimate)
 
 annual<- gasweighted %>%
@@ -95,27 +95,27 @@ annual<- gasweighted %>%
 
 
 storageCH4<-ggplot(data = annual)+
-  geom_point(aes(x = doy, y = CH4 *1000000,  shape = Depth))+
+  geom_point(aes(x = doy, y = CH4 *1000000,  shape = Depth), size = 3)+
   geom_line(aes(x = doy, y = CH4 *1000000,  group = depth))+
-  geom_path(aes(x = doy, y = CH4Mass), color = "yellow")+
+  geom_path(aes(x = doy, y = CH4Mass), color = "red2", size = 1.2)+
   xlab("")+
   scale_y_continuous(breaks=seq(0,500,100))+
   scale_x_continuous(breaks=seq(0,350,50))+
   scale_shape_manual(values = c(1, 16, 0, 15))+
   ylab(expression(paste("[C", H[4 (aq)], "] (", mu,"M) ")))+
-  theme_bw(base_size = 12)+
+  theme_bw(base_size = 30)+
   annotate("rect", xmin = 0, xmax = 118, ymin = -1, ymax = 600, alpha = 0.1)
 
 storageCO2<-ggplot(data = annual)+
-  geom_point(aes(x = doy, y = CO2 *1000000,  shape = Depth))+
+  geom_point(aes(x = doy, y = CO2 *1000000,  shape = Depth), size = 3)+
   geom_line(aes(x = doy, y = CO2 *1000000,  group = depth))+
-  geom_path(aes(x = doy, y = CO2Mass), color = "yellow")+
+  geom_path(aes(x = doy, y = CO2Mass), color = "turquoise4", size = 1.2)+
   xlab("Day Number")+
   scale_y_continuous(breaks=seq(0,1500,200))+
   scale_shape_manual(values = c(1, 16, 0, 15))+
   ylab(expression(paste("[C", O[2 (aq)], "] (", mu,"M) ")))+
-  theme_bw(base_size = 12)+
+  theme_bw(base_size = 30)+
   annotate("rect", xmin = 0, xmax = 118, ymin = -1, ymax = 1500, alpha = 0.1)
 
 figure<-(storageCH4 +storageCO2) + plot_layout(guides = "collect", ncol = 1)
-ggsave("figures/TBstorage.png", width = 8, height = 10, units = 'in', figure)
+ggsave("figures/TBstorage.png", width = 10, height = 10, units = 'in', figure)
