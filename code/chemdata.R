@@ -6,8 +6,13 @@ library(lubridate)
 data = read_csv('data/ChemTempDO/chemcarbon.csv')
 data$Date = as.Date(data$Date, format =  "%m/%d/%y")
 
-winter<- data %>%
-  filter()
+data<- data %>%
+  na.omit()%>%
+  mutate(epi = (Depth < 4 ))%>%
+  mutate(hypo = Depth > 4)
+avg<- data %>%
+  group_by(lakeid, epi, hypo)%>%
+  summarise(mean = mean(DOC))
 
 #DOC
 ggplot(dplyr::filter(data, lakeid == 'TB' | lakeid == 'SSB'))+
