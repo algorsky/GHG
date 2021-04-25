@@ -29,11 +29,11 @@ ggplot(dplyr::filter(chloro, lakeid == 'SSB'))+
   geom_jitter(aes(x = factor(sampledate), y =chlor, color = depth), alpha = 0.05)+
   facet_wrap(~lakeid)
 
-chlsurf<-ggplot(dplyr::filter(ssb.chloro, depth == 0 & (Year == 2020 | Year == 2021)))+
+chlsurf<-ggplot(dplyr::filter(ssb.chloro, depth == 0 & (Year == 2019 |Year == 2020 | Year == 2021)))+
   geom_col(aes(x = factor(sampledate), y = chlor, fill = Year))+
   xlab("")+
   ylab(expression(paste("Surface Chl a (",  mu,"g ", L^-1,")")))+
-  scale_fill_manual(values = c('lightblue4','gold')) +
+  scale_fill_manual(values = c("gray",'lightblue4','gold')) +
   theme_bw(base_size = 20)+
   theme(legend.position = "none")+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -52,12 +52,12 @@ tbchlsurf<-ggplot(dplyr::filter(tb.chloro, depth == 0 ))+
 
 #ggsave("figures/chlsurf.png", width = 15, height = 6, units = 'in', chlsurf)
 
-chl<-ggplot(dplyr::filter(ssb.chloro, depth != 0 & (Year == 2020 | Year == 2021)), aes(x = factor(sampledate), y = chlor, group = factor(sampledate), color = depth, fill = Year, alpha = 0.2))+
+chl<-ggplot(dplyr::filter(ssb.chloro, depth != 0 & (Year == 2019 |Year == 2020 | Year == 2021)), aes(x = factor(sampledate), y = chlor, group = factor(sampledate), color = depth, fill = Year, alpha = 0.2))+
   geom_boxplot()+ #might help better display the median and range of your data.
   geom_jitter(alpha = 0.5, size = 3)+ #alpha plays around with the transparency of the points
   #jitter makes it so the points aren't on top of each other
   scale_colour_viridis_c()+
-  scale_fill_manual(values = c('lightblue4','gold')) +
+  scale_fill_manual(values = c("gray", 'lightblue4','gold')) +
   xlab("")+
   ylab(expression(paste("SSB Chl a (",  mu,"g ", L^-1,")")))+
   theme_bw(base_size = 20)+
