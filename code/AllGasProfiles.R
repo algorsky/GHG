@@ -8,8 +8,8 @@ library(scales)
 
 ## Load the data from Github
 # Read in data 
-prac2021 = read_csv('data/GC2021/tidy.dat.out2021.csv')
-prac2020 = read_csv('data/tidy.dat.out.csv')
+prac2021 = read_csv('data/GC2021/tidy.all2021.csv')
+prac2020 = read_csv('data/tidy.dat.out2020.csv')
 gas<- rbind(prac2021, prac2020)
 gas$date = as.Date(gas$date, format =  "%m/%d/%y")
 gas$doy = yday(gas$date)
@@ -19,14 +19,40 @@ gas$doy = yday(gas$date)
 gd <- gas %>% 
   group_by(lake, date, depth, doy) %>% 
   summarise(
-    CO2 = mean(dissolvedCO2),
-    CH4 = mean(dissolvedCH4)
+    CO2 = mean(dissolvedCO2)*1000000,
+    CH4 = mean(dissolvedCH4)*1000000
   )%>%
-  mutate(icecovered = ifelse(month(date)%in% 1:4,"yes",
-                             "no"))
+  mutate(icecovered = ifelse(month(date)%in% 1:3,"yes",
+                             "no"))%>%
+  mutate(year = factor(year(date)))
 
-gd.2020<- gd%>%
-  filter(date <= as.POSIXct('2021-01-01'))
+write_csv(gd,'data/dataALL.csv')
+write.table(gd, 'data/dataALL.csv', sep="\t")
+
+onoff<- gd%>%
+  filter(date == as.POSIXct('2020-03-06') |date == as.POSIXct('2020-05-04')|date == as.POSIXct('2020-03-07')|date == as.POSIXct('2021-03-15')|date == as.POSIXct('2021-04-13'))
+
+#On and Off
+ggplot(dplyr::filter(gd, lake == 'TB'| lake == 'SSB')) + 
+  geom_point(aes(x = CO2*1000000, y = depth, color = year, shape = icecovered,size = 3)) +
+  geom_path(aes(x = CO2*1000000, y = depth, group = date, color = year)) +
+  facet_wrap(~lake) +
+  scale_y_reverse(name = "Depth (m)") +
+  scale_x_continuous(name = "dissolved CO2 gas (umol/L)", limits = c(0, 2000))+
+  scale_color_manual(values = c('lightblue4','gold')) +
+  theme_bw(base_size = 8)#+
+  #theme(legend.position = "none")
+
+ggplot(dplyr::filter(gd, lake == 'TB'| lake == 'SSB')) + 
+  geom_point(aes(x = CH4*1000000, y = depth, color = year, shape = icecovered,size = 3)) +
+  geom_path(aes(x = CH4*1000000, y = depth, group = date, color = year)) +
+  facet_wrap(~lake) +
+  scale_y_reverse(name = "Depth (m)") +
+  scale_x_continuous(name = "dissolved CH4 gas (umol/L)")+
+  scale_color_manual(values = c('lightblue4','gold'), name = "Year") +
+  scale_shape_discrete(name = "Ice Covered")+
+  theme_bw(base_size = 8)+
+  theme()
 
 summary2020<- gd.2020 %>%
   group_by(lake, depth, icecovered)%>%
@@ -49,19 +75,19 @@ ggplot(dplyr::filter(ssb.gas, lake == 'TB'| lake == 'SSB')) +
   theme_bw()+
   theme(legend.position = "none")
 # CO2
-CO2<-ggplot(dplyr::filter(gd.2020, lake == 'TB'| lake == 'SSB')) + 
-  geom_point(aes(x = CO2*1000000, y = depth, color = doy, shape = icecovered),size = 3) +
+CO2<-ggplot(dplyr::filter(gd, lake == 'TB'| lake == 'SSB')) + 
+  geom_point(aes(x = CO2*1000000, y = depth, color = doy, shape = factor(year),size = 3)) +
   geom_path(aes(x = CO2*1000000, y = depth, group = date, color = doy)) +
   facet_wrap(~lake) +
   scale_y_reverse(name = "Depth (m)") +
   scale_x_continuous(name = "dissolved CO2 gas (umol/L)", limits = c(0, 2000))+
   scale_colour_viridis_c()+
   theme_bw()+
-  theme(legend.position = "none")
+  #theme(legend.position = "none")
 
 # CH4
-CH4<-ggplot(dplyr::filter(gd.2020, lake == 'TB'| lake == 'SSB')) + 
-  geom_point(aes(x = CH4*1000000, y = depth, color = doy, shape = icecovered),size = 3) +
+CH4<-ggplot(dplyr::filter(gd, lake == 'TB' & year == 2020| lake == 'SSB' & year == 2020)) + 
+  geom_point(aes(x = CH4*1000000, y = depth, color = doy, shape = factor(year)),size = 3) +
   geom_path(aes(x = CH4*1000000, y = depth, group = date, color = doy)) +
   facet_wrap(~lake) +
   scale_y_reverse(name = "Depth (m)") +

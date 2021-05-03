@@ -57,16 +57,17 @@ dat.2021 <- df.2021 %>%
 
 #write.table(dat.2021, 'data/GC2021/dat.2021.csv', sep="\t")
 
-dat = read_csv('data/GC2021/dat.2021.csv')
+dat = read_csv('data/2020/data.2020.csv')
 dat.all = read_csv('data/GC2021/dat.csv')
 dat.out <- def.calc.sdg.conc(as.data.frame(dat)) %>%
   filter(lake == 'TB' | lake == 'SSB')%>%
   select(lake,date,depth,dissolvedCO2,dissolvedCH4) %>% 
   gather(value="value",key="parameter",-lake,-date,-depth)
 
-tidy.dat.out2021 <- def.calc.sdg.conc(as.data.frame(dat)) %>%
+tidy.dat.out2020 <- def.calc.sdg.conc(as.data.frame(dat)) %>%
   filter(lake == 'TB' | lake == 'SSB')%>%
   select(lake,date,depth,dissolvedCO2,dissolvedCH4)
+#write.table(tidy.dat.out2020, 'data/tidy.dat.out2020.csv', sep="\t")
 
 sat.dat.out2021 <- def.calc.sdg.conc(as.data.frame(dat)) %>%
   filter(lake == 'TB' | lake == 'SSB')%>%

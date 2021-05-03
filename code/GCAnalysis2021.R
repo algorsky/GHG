@@ -5,7 +5,7 @@ library(neonDissGas)
 
 #QA/QC
 # Read in data 
-df = read_csv('data/GC2021/2021Run1/20210401_GC_Export.csv')  %>% 
+df = read_csv('data/GC2021/20210415_GC_Export.csv')  %>% 
   filter(batch_id == 'SSB')%>%
   mutate(sample_id = str_replace_all(sample_id, pattern = "2020_01_", replacement = "2020-01-")) %>%  #because you switch from underscores to dashes
   separate(col = sample_id, into = c('lake','date','depth','replicate'), sep = "_", remove = FALSE) %>% 
@@ -20,25 +20,25 @@ df = read_csv('data/GC2021/2021Run1/20210401_GC_Export.csv')  %>%
   filter(!(parameter == "CO2_TCD" & value <=1000)) %>% 
   mutate(value = round(value,digits=0))
 
-#write.table(df, 'data/qaqc2021.csv', sep="\t")
+#write.table(df, 'data/qaqcspring2021.csv', sep="\t")
 
 
 # Read in data 
-df.2021 = read_csv('data/GC2021/2021Run1/20210401_GC_Export.csv')  %>% 
+df.spring.2021 = read_csv('data/GC2021/20210415_GC_Export.csv')  %>% 
   filter(batch_id == 'SSB')%>%
   mutate(sample_id = str_replace_all(sample_id, pattern = "2020_01_", replacement = "2020-01-")) %>%  #because you switch from underscores to dashes
   separate(col = sample_id, into = c('lake','date','depth','replicate'), sep = "_", remove = FALSE) %>% 
   mutate(date = as.Date(date)) 
 
 #write.table(df.2021, 'data/df.new.2021.csv', sep="\t")
-air_samples <- df.2021 %>% filter(grepl("Air",depth)) %>% 
+air_samples <- df.spring.2021 %>% filter(grepl("Air",depth)) %>% 
   select(-analysis_date,-batch_id,-sample_id,-depth) %>% 
   group_by(lake,date) %>% 
   summarize_all(list(median = median)) %>% 
   select(-CO2_TCD_median,-CH4_TCD_median) %>%  #levels are all to low to use TCD
   ungroup()
 
-dat.2021 <- df.2021 %>% 
+dat.spring.2021 <- df.spring.2021 %>% 
   filter(!grepl("Air",depth)) %>% 
   select(analysis_date, batch_id,sample_id, lake, date,depth,CO2_FID,CO2_TCD,CH4_FID,CH4_TCD,N2O_ECD) %>% 
   mutate(N2O_ECD = replace(N2O_ECD,N2O_ECD < 0, 0)) %>% 
@@ -55,19 +55,24 @@ dat.2021 <- df.2021 %>%
   mutate(headspaceTemp = 0.2) %>% #degC Assume it is the same was water temp
   mutate(barometricPressure = 103.991) #kpa
 
-write.table(dat.2021, 'data/GC2021/dat.new.2021.csv', sep="\t")
+write.table(dat.spring.2021, 'data/GC2021/dat.spring.2021.csv', sep="\t")
 
-dat = read_csv('data/GC2021/dat.new.2021.csv')
+dat = read_csv('data/GC2021/dat.spring.2021.csv')
 dat.out <- def.calc.sdg.conc(as.data.frame(dat)) %>%
   filter(lake == 'TB' | lake == 'SSB')%>%
   select(lake,date,depth,dissolvedCO2,dissolvedCH4) %>% 
   gather(value="value",key="parameter",-lake,-date,-depth)
 
-tidy.dat.out.all2021 <- def.calc.sdg.conc(as.data.frame(dat)) %>%
+tidy.dat.out.spring2021 <- def.calc.sdg.conc(as.data.frame(dat)) %>%
   filter(lake == 'TB' | lake == 'SSB')%>%
   select(lake,date,depth,dissolvedCO2,dissolvedCH4)
 
-write.table(tidy.dat.out.all2021, 'data/GC2021/tidy.all2021.csv', sep="\t")
+dat = read_csv('data/dat.2020.csv')
+tidy.dat.out.2020 <- def.calc.sdg.conc(as.data.frame(dat)) %>%
+  filter(lake == 'TB' | lake == 'SSB')%>%
+  select(lake,date,depth,dissolvedCO2,dissolvedCH4)
+
+write.table(tidy.dat.out.spring2021, 'data/GC2021/tidy.spring2021.csv', sep="\t")
 
 sat.dat.out2021 <- def.calc.sdg.conc(as.data.frame(dat)) %>%
   filter(lake == 'TB' | lake == 'SSB')%>%
