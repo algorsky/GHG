@@ -26,33 +26,62 @@ gd <- gas %>%
                              "no"))%>%
   mutate(year = factor(year(date)))
 
-write_csv(gd,'data/dataALL.csv')
-write.table(gd, 'data/dataALL.csv', sep="\t")
+#write_csv(gd,'data/dataALL.csv')
+#write.table(gd, 'data/dataALL.csv', sep="\t")
 
 onoff<- gd%>%
   filter(date == as.POSIXct('2020-03-06') |date == as.POSIXct('2020-05-04')|date == as.POSIXct('2020-03-07')|date == as.POSIXct('2021-03-15')|date == as.POSIXct('2021-04-13'))
 
-#On and Off
-ggplot(dplyr::filter(gd, lake == 'TB'| lake == 'SSB')) + 
-  geom_point(aes(x = CO2*1000000, y = depth, color = year, shape = icecovered,size = 3)) +
-  geom_path(aes(x = CO2*1000000, y = depth, group = date, color = year)) +
+co2ice<-ggplot(dplyr::filter(onoff, lake == 'TB'| lake == 'SSB')) + 
+  geom_point(aes(x = CO2, y = depth, color = year, shape = icecovered), size = 3) +
+  geom_path(aes(x = CO2, y = depth, group = date, color = year)) +
   facet_wrap(~lake) +
+  guides(size = FALSE)+
   scale_y_reverse(name = "Depth (m)") +
-  scale_x_continuous(name = "dissolved CO2 gas (umol/L)", limits = c(0, 2000))+
+  scale_x_continuous(name = ((expression(paste("C", O[2], " (", mu,"mol ", L^-1,")")))), limits = c(0, 2000))+
   scale_color_manual(values = c('lightblue4','gold')) +
-  theme_bw(base_size = 8)#+
-  #theme(legend.position = "none")
+  theme_bw(base_size = 8)+
+  theme()
+ch4ice<-ggplot(dplyr::filter(onoff, lake == 'TB'| lake == 'SSB')) + 
+  geom_point(aes(x = CH4, y = depth, color = year, shape = icecovered), size = 3) +
+  geom_path(aes(x = CH4, y = depth, group = date, color = year)) +
+  facet_wrap(~lake) +
+  guides(size = FALSE)+
+  scale_y_reverse(name = "Depth (m)") +
+  scale_x_continuous(name = ((expression(paste("C", H[4], " (", mu,"mol ", L^-1,")")))))+
+  scale_color_manual(values = c('lightblue4','gold')) +
+  theme_bw(base_size = 8)+
+  theme()
 
-ggplot(dplyr::filter(gd, lake == 'TB'| lake == 'SSB')) + 
-  geom_point(aes(x = CH4*1000000, y = depth, color = year, shape = icecovered,size = 3)) +
-  geom_path(aes(x = CH4*1000000, y = depth, group = date, color = year)) +
+diffgas<- co2ice/ch4ice
+ggsave("figures/diffgas.png", width = 10, height = 8, units = 'in', diffgas)
+
+#On and Off
+co2compare<-ggplot(dplyr::filter(gd, lake == 'TB'| lake == 'SSB' & icecovered == "yes")) + 
+  geom_point(aes(x = CO2, y = depth, color = year), size = 3) +
+  geom_path(aes(x = CO2, y = depth, group = date, color = year)) +
+  facet_wrap(~lake) +
+  guides(size = FALSE)+
+  scale_y_reverse(name = "Depth (m)") +
+  scale_x_continuous(name = ((expression(paste("C", O[2], " (", mu,"mol ", L^-1,")")))), limits = c(0, 2000))+
+  scale_color_manual(values = c('lightblue4','gold')) +
+  theme_bw(base_size = 8)+
+  theme(legend.position = "none")
+
+ch4compare<-ggplot(dplyr::filter(gd, lake == 'TB'| lake == 'SSB'& icecovered == "yes")) + 
+  geom_point(aes(x = CH4, y = depth, color = year), size = 3) +
+  geom_path(aes(x = CH4, y = depth, group = date, color = year)) +
+  guides(size = FALSE)+
   facet_wrap(~lake) +
   scale_y_reverse(name = "Depth (m)") +
-  scale_x_continuous(name = "dissolved CH4 gas (umol/L)")+
+  scale_x_continuous(name = ((expression(paste("C", H[4], " (", mu,"mol ", L^-1,")")))))+
   scale_color_manual(values = c('lightblue4','gold'), name = "Year") +
   scale_shape_discrete(name = "Ice Covered")+
   theme_bw(base_size = 8)+
   theme()
+
+compare<-co2compare/ch4compare
+ggsave("figures/19-20compare.png", width = 10, height = 8, units = 'in', compare)
 
 summary2020<- gd.2020 %>%
   group_by(lake, depth, icecovered)%>%

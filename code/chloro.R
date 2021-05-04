@@ -32,10 +32,9 @@ ggplot(dplyr::filter(chloro, lakeid == 'SSB'))+
 chlsurf<-ggplot(dplyr::filter(ssb.chloro, depth == 0 & (Year == 2019 |Year == 2020 | Year == 2021)))+
   geom_col(aes(x = factor(sampledate), y = chlor, fill = Year))+
   xlab("")+
-  ylab(expression(paste("Surface Chl a (",  mu,"g ", L^-1,")")))+
+  ylab(expression(paste("Sparkling Bog Surface Chl a (",  mu,"g ", L^-1,")")))+
   scale_fill_manual(values = c("gray",'lightblue4','gold')) +
-  theme_bw(base_size = 20)+
-  theme(legend.position = "none")+
+  theme_bw(base_size = 8)+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ggsave("figures/chlsurf.png", width = 15, height = 6, units = 'in', chlsurf)
@@ -44,23 +43,25 @@ ggsave("figures/chlsurf.png", width = 15, height = 6, units = 'in', chlsurf)
 tbchlsurf<-ggplot(dplyr::filter(tb.chloro, depth == 0 ))+
   geom_col(aes(x = factor(sampledate), y = chlor, fill = Year))+
   xlab("")+
-  ylab(expression(paste("Surface Chl a (",  mu,"g ", L^-1,")")))+
+  ylab(expression(paste("Trout Bog Surface Chl a (",  mu,"g ", L^-1,")")))+
   scale_fill_manual(values = c('gray','lightblue4','gold')) +
-  theme_bw(base_size = 20)+
+  theme_bw(base_size = 8)+
   theme(legend.position = "none")+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-#ggsave("figures/chlsurf.png", width = 15, height = 6, units = 'in', chlsurf)
+surface<- chlsurf/tbchlsurf
+
+ggsave("figures/chlbogsurf.png", width = 15, height = 6, units = 'in', surface)
 
 chl<-ggplot(dplyr::filter(ssb.chloro, depth != 0 & (Year == 2019 |Year == 2020 | Year == 2021)), aes(x = factor(sampledate), y = chlor, group = factor(sampledate), color = depth, fill = Year, alpha = 0.2))+
   geom_boxplot()+ #might help better display the median and range of your data.
-  geom_jitter(alpha = 0.5, size = 3)+ #alpha plays around with the transparency of the points
+  geom_jitter(alpha = 0.5, size = 3, show_legend = FALSE)+ #alpha plays around with the transparency of the points
   #jitter makes it so the points aren't on top of each other
   scale_colour_viridis_c()+
   scale_fill_manual(values = c("gray", 'lightblue4','gold')) +
   xlab("")+
   ylab(expression(paste("SSB Chl a (",  mu,"g ", L^-1,")")))+
-  theme_bw(base_size = 20)+
+  theme_bw(base_size = 8)+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
   
   
@@ -74,11 +75,11 @@ tbchl<-ggplot(dplyr::filter(tb.chloro, depth != 0), aes(x = factor(sampledate), 
   scale_fill_manual(values = c('gray','lightblue4','gold')) +
   xlab("")+
   ylab(expression(paste("TB Chl a (",  mu,"g ", L^-1,")")))+
-  theme_bw(base_size = 20)+
+  theme_bw(base_size = 8)+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-figure<-(chl + chlsurf + tbchl +tbchlsurf) + plot_layout(guides = "collect", ncol = 2)
-ggsave("figures/chlorocompare.png", width = 12, height = 10, units = 'in', figure)
+figure<-(chl  + tbchl ) + plot_layout(guides = "collect", ncol = 2)
+ggsave("figures/chlorocompare.png", width = 15, height = 10, units = 'in', figure)
 
   xlab('Month')+
   ylab("pH")+
