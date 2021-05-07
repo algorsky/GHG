@@ -39,7 +39,8 @@ co2ice<-ggplot(dplyr::filter(onoff, lake == 'TB'| lake == 'SSB')) +
   guides(size = FALSE)+
   scale_y_reverse(name = "Depth (m)") +
   scale_x_continuous(name = ((expression(paste("C", O[2], " (", mu,"mol ", L^-1,")")))), limits = c(0, 2000))+
-  scale_color_manual(values = c('lightblue4','gold')) +
+  scale_color_manual(values = c('lightblue4','gold'), name = "Year") +
+  scale_shape(name = "Ice Covered?")+
   theme_bw(base_size = 8)+
   theme()
 ch4ice<-ggplot(dplyr::filter(onoff, lake == 'TB'| lake == 'SSB')) + 
@@ -47,31 +48,34 @@ ch4ice<-ggplot(dplyr::filter(onoff, lake == 'TB'| lake == 'SSB')) +
   geom_path(aes(x = CH4, y = depth, group = date, color = year)) +
   facet_wrap(~lake) +
   guides(size = FALSE)+
+  guides(shape = FALSE)+
+  guides(color = FALSE)+
   scale_y_reverse(name = "Depth (m)") +
   scale_x_continuous(name = ((expression(paste("C", H[4], " (", mu,"mol ", L^-1,")")))))+
   scale_color_manual(values = c('lightblue4','gold')) +
   theme_bw(base_size = 8)+
   theme()
 
-diffgas<- co2ice/ch4ice
-ggsave("figures/diffgas.png", width = 10, height = 8, units = 'in', diffgas)
+diffgas<- co2ice/ch4ice + plot_layout(guides = "collect")
+ggsave("figures/diffgas.png", width = 8, height = 6, units = 'in', diffgas)
 
 #On and Off
-co2compare<-ggplot(dplyr::filter(gd, lake == 'TB'| lake == 'SSB' & icecovered == "yes")) + 
+co2compare<-ggplot(dplyr::filter(gd, (lake == 'TB'& icecovered == "yes")| (lake == 'SSB' & icecovered == "yes"))) + 
   geom_point(aes(x = CO2, y = depth, color = year), size = 3) +
   geom_path(aes(x = CO2, y = depth, group = date, color = year)) +
   facet_wrap(~lake) +
   guides(size = FALSE)+
   scale_y_reverse(name = "Depth (m)") +
   scale_x_continuous(name = ((expression(paste("C", O[2], " (", mu,"mol ", L^-1,")")))), limits = c(0, 2000))+
-  scale_color_manual(values = c('lightblue4','gold')) +
-  theme_bw(base_size = 8)+
-  theme(legend.position = "none")
+  scale_color_manual(values = c('lightblue4','gold'), name = "Year") +
+  theme_bw(base_size = 8)
 
-ch4compare<-ggplot(dplyr::filter(gd, lake == 'TB'| lake == 'SSB'& icecovered == "yes")) + 
+ch4compare<-ggplot(dplyr::filter(gd, (lake == 'TB'& icecovered == "yes")|( lake == 'SSB'& icecovered == "yes"))) + 
   geom_point(aes(x = CH4, y = depth, color = year), size = 3) +
   geom_path(aes(x = CH4, y = depth, group = date, color = year)) +
   guides(size = FALSE)+
+  guides(shape = FALSE)+
+  guides(color = FALSE)+
   facet_wrap(~lake) +
   scale_y_reverse(name = "Depth (m)") +
   scale_x_continuous(name = ((expression(paste("C", H[4], " (", mu,"mol ", L^-1,")")))))+
@@ -80,8 +84,16 @@ ch4compare<-ggplot(dplyr::filter(gd, lake == 'TB'| lake == 'SSB'& icecovered == 
   theme_bw(base_size = 8)+
   theme()
 
-compare<-co2compare/ch4compare
-ggsave("figures/19-20compare.png", width = 10, height = 8, units = 'in', compare)
+compare<- gd %>%
+  filter(icecovered == "yes")%>%
+  group_by(lake, depth, year(date))%>%
+  summarise(minCO2 = min(CO2),
+            maxCO2 = max(CO2),
+            minCH4 = min(CH4),
+            maxCH4 = max(CH4))
+
+compare<-co2compare/ch4compare + plot_layout(guides = "collect")
+ggsave("figures/19-20compare.png", width = 8, height = 6, units = 'in', compare)
 
 summary2020<- gd.2020 %>%
   group_by(lake, depth, icecovered)%>%
@@ -127,39 +139,44 @@ CH4<-ggplot(dplyr::filter(gd, lake == 'TB' & year == 2020| lake == 'SSB' & year 
   theme()
 
 # Read in data 
-tempdo = read_csv('data/ChemTempDO/tempdo.csv')
-tempdo$date = as.Date(tempdo$Date, format =  "%m/%d/%y")
+tempdo = read_csv('data/ChemTempDO/tempdoSSB.csv')
+tempdo$sampledate = as.Date(tempdo$sampledate, format =  "%m/%d/%y")
 tempdo<- tempdo%>%
-  mutate(icecovered = ifelse(month(date)%in% 1:4,"yes",
+  mutate(icecovered = ifelse(month(sampledate)%in% 1:3,"yes",
                              "no"))
 
 tempdowinter<- tempdo%>%
-  filter(month(date)%in% 1:4)%>%
-  mutate(Year = year(date))
+  filter(month(sampledate)%in% 1:3)%>%
+  mutate(Year = year(sampledate))
 
-ssbwinter<-ggplot(dplyr::filter(tempdowinter, Bog == 'SSB')) + 
-  geom_point(aes(x = DO, y = Depth, color = factor(Year)), size = 5) +
-  geom_path(aes(x = DO, y = Depth, color = factor(Year), group = date))+
+ssbwinter<-ggplot(dplyr::filter(tempdowinter, lake == 'SSB')) + 
+  geom_point(aes(x = waterTemp_C, y = water_depth_m, color = factor(Year)), size = 2) +
+  geom_path(aes(x = waterTemp_C, y = water_depth_m, color = factor(Year), group = sampledate))+
+  scale_color_manual(name = 'Year',values = c('gray','lightblue4','gold')) +
   scale_y_reverse(name = "Depth (m)") +
-  scale_x_continuous(name = "DO (mg/L)")+
-  theme_bw(base_size = 20)+
+  scale_x_continuous(name = "Temperature (C)")+
+  labs(title = "South Sparkling Bog")+
+  theme_bw(base_size = 8)+
   theme(legend.title = element_blank())
 
-tbwinter<-ggplot(dplyr::filter(tempdowinter, Bog == 'TB')) + 
-  geom_point(aes(x = DO, y = Depth, color = factor(Year)), size = 5) +
-  geom_path(aes(x = DO, y = Depth, color = factor(Year), group = date))+
+tbwinter<-ggplot(dplyr::filter(tempdowinter, lake == 'TB')) + 
+  geom_point(aes(x = waterTemp_C, y = water_depth_m, color = factor(Year)), size = 2) +
+  geom_path(aes(x = waterTemp_C, y = water_depth_m, color = factor(Year), group = sampledate))+
+  scale_color_manual(name = 'Year',values = c('gray','lightblue4','gold')) +
   scale_y_reverse(name = "Depth (m)") +
-  scale_x_continuous(name = "DO (mg/L)")+
-  theme_bw(base_size = 20)+
+  scale_x_continuous(name = "Temperature (C)")+
+  labs(title = "Trout Bog")+
+  theme_bw(base_size = 8)+
   theme(legend.title = element_blank())
 
-
+temp<- ssbwinter + tbwinter
+ggsave("figures/tempSSBTB.png", width = 8, height = 6, units = 'in', temp)
   
 tempdo2020 <- tempdo %>%
   filter(date <= as.POSIXct('2021-01-01'))
 
 #Facet_Wrap by Date for Temperature and DO for Trout Bog
-Temp<-ggplot(dplyr::filter(tempdo, Bog == 'SSB')) + 
+Temp<-ggplot(dplyr::filter(tempdo, lake == 'SSB')) + 
   geom_point(aes(x = waterTemp, y = Depth, color = date, shape = icecovered), size = 2) +
   geom_path(aes(x = waterTemp, y = Depth, color = date, group = date))+
   facet_wrap(~year(tempdo$date)) +

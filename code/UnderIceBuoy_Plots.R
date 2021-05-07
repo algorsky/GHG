@@ -30,25 +30,25 @@ doHour.2021 = do.2021 %>% group_by(CT.Date = floor_date(CT.Date, "1 hour")) %>%
 
 doHour.2019 = doHour.2019 %>%
   filter(as.Date(CT.Date) > as.Date('2018-12-09')) %>%
-  filter(as.Date(CT.Date) < as.Date('2019-04-01')) %>%
+  filter(as.Date(CT.Date) < as.Date('2019-06-01')) %>%
   mutate(doy = yday(as.Date(CT.Date)))%>%
   select(CT.Date, DO.mgL, T.degC, doy)
 
 
 doHour.2021 = doHour.2021 %>%
   filter(as.Date(CT.Date) > as.Date('2020-12-10')) %>%
-  filter(as.Date(CT.Date) < as.Date('2021-04-01')) %>%
+  filter(as.Date(CT.Date) < as.Date('2021-05-01')) %>%
   mutate(doy = yday(as.Date(CT.Date)))
 
 doHour.2020 = doHour.2020 %>% 
   filter(as.Date(CT.Date) != as.Date('2020-03-02')) %>%
   filter(as.Date(CT.Date) > as.Date('2019-11-15')) %>%
-  filter(as.Date(CT.Date) < as.Date('2020-04-01'))%>%
+  filter(as.Date(CT.Date) < as.Date('2020-06-01'))%>%
   mutate(doy = yday(as.Date(CT.Date)))
 
 doHour<- rbind(doHour.2019, doHour.2020, doHour.2021)%>%
   mutate(year = year(as.Date(CT.Date)))%>%
-  filter(doy > 0 & doy < 60)
+  filter(doy > 0 & doy < 160)
 
 surfaceDO<-doHour %>%
   ggplot() +
@@ -56,8 +56,11 @@ surfaceDO<-doHour %>%
   scale_x_date(labels = date_format("%b"), breaks = "1 month")+
   scale_color_manual(name = 'Year', values = c('gray','lightblue4','gold')) +
   theme_bw(base_size = 8) +
-  labs(title = 'Sparkling Bog 2019-2021') + ylab('Surface DO (mg/L)') + xlab('Date')
-ggsave("figures/surfacebuoyDO.png", width = 15, height = 10, units = 'in', surfaceDO)
+  labs(title = 'Sparkling Bog 2019-2021') + ylab('Surface DO (mg/L)') + xlab('Date')+
+  geom_vline(xintercept = as.numeric(as.Date("2019-04-13")),  linetype = "dashed", color = "gray")+
+  geom_vline(xintercept = as.numeric(as.Date("2019-04-06")),  linetype = "dashed", color = "gold")+
+  geom_vline(xintercept = as.numeric(as.Date("2019-04-26")),  linetype = "dashed", color = "lightblue4")
+ggsave("figures/surfacebuoyDO.png", width = 8, height = 6, units = 'in', surfaceDO)
 
 p.do1 = ggplot(doHour.2020) +
   geom_line(aes(x = CT.Date, y = DO.mgL, color = '2020')) +

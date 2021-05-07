@@ -22,45 +22,61 @@ tb.chloro = tb.chloro  %>%
 
 chloro = rbind(ssb.chloro,tb.chloro)
 
+summarychl<-chloro%>%
+  mutate(month = month(as.Date(sampledate)))%>%
+  mutate(year = year(as.Date(sampledate)))%>%
+  group_by(lakeid,year, depth)%>%
+  summarize(min = min(chlor),
+            max = max(chlor))
 
+watercolumn<-chloro%>%
+  mutate(month = month(as.Date(sampledate)))%>%
+  mutate(year = year(as.Date(sampledate)))%>%
+  group_by(lakeid,year)%>%
+  filter(depth != 0)%>%
+  summarize(min = min(chlor),
+            max = max(chlor))
 
 ggplot(dplyr::filter(chloro, lakeid == 'SSB'))+
   geom_boxplot(aes(x = factor(sampledate), y = chlor))+
   geom_jitter(aes(x = factor(sampledate), y =chlor, color = depth), alpha = 0.05)+
+  labs("Sparkling Bog")+
   facet_wrap(~lakeid)
 
 chlsurf<-ggplot(dplyr::filter(ssb.chloro, depth == 0 & (Year == 2019 |Year == 2020 | Year == 2021)))+
-  geom_col(aes(x = factor(sampledate), y = chlor, fill = Year))+
+  geom_col(aes(x = factor(sampledate), y = chlor, fill = Year), width = 0.5)+
   xlab("")+
-  ylab(expression(paste("Sparkling Bog Surface Chl a (",  mu,"g ", L^-1,")")))+
+  ylab(expression(paste("Surface Chl a (",  mu,"g ", L^-1,")")))+
   scale_fill_manual(values = c("gray",'lightblue4','gold')) +
+  labs(title = "South Sparkling Bog")+
   theme_bw(base_size = 8)+
+  ylim(0, 300)+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-ggsave("figures/chlsurf.png", width = 15, height = 6, units = 'in', chlsurf)
-
-
 tbchlsurf<-ggplot(dplyr::filter(tb.chloro, depth == 0 ))+
-  geom_col(aes(x = factor(sampledate), y = chlor, fill = Year))+
+  geom_col(aes(x = factor(sampledate), y = chlor, fill = Year), width = 0.5)+
   xlab("")+
-  ylab(expression(paste("Trout Bog Surface Chl a (",  mu,"g ", L^-1,")")))+
+  ylim(0, 300)+
+  ylab(expression(paste("Surface Chl a (",  mu,"g ", L^-1,")")))+
   scale_fill_manual(values = c('gray','lightblue4','gold')) +
   theme_bw(base_size = 8)+
-  theme(legend.position = "none")+
+  labs(title = "Trout Bog")+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 surface<- chlsurf/tbchlsurf
 
-ggsave("figures/chlbogsurf.png", width = 15, height = 6, units = 'in', surface)
+ggsave("figures/chlbogsurf.png", width = 8, height = 6, units = 'in', surface)
 
 chl<-ggplot(dplyr::filter(ssb.chloro, depth != 0 & (Year == 2019 |Year == 2020 | Year == 2021)), aes(x = factor(sampledate), y = chlor, group = factor(sampledate), color = depth, fill = Year, alpha = 0.2))+
   geom_boxplot()+ #might help better display the median and range of your data.
-  geom_jitter(alpha = 0.5, size = 3, show_legend = FALSE)+ #alpha plays around with the transparency of the points
+  geom_jitter(alpha = 0.5, size = 3)+ #alpha plays around with the transparency of the points
   #jitter makes it so the points aren't on top of each other
-  scale_colour_viridis_c()+
-  scale_fill_manual(values = c("gray", 'lightblue4','gold')) +
+  guides(alpha = FALSE)+
+  scale_colour_viridis_c(name = "Depth")+
+  scale_fill_manual(values = c("gray", 'lightblue4','gold'), name = "Year") +
   xlab("")+
-  ylab(expression(paste("SSB Chl a (",  mu,"g ", L^-1,")")))+
+  labs(title = "South Sparkling Bog")+
+  ylab(expression(paste("Chl a (",  mu,"g ", L^-1,")")))+
   theme_bw(base_size = 8)+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
   
@@ -74,12 +90,16 @@ tbchl<-ggplot(dplyr::filter(tb.chloro, depth != 0), aes(x = factor(sampledate), 
   scale_colour_viridis_c()+
   scale_fill_manual(values = c('gray','lightblue4','gold')) +
   xlab("")+
-  ylab(expression(paste("TB Chl a (",  mu,"g ", L^-1,")")))+
+  guides(alpha = FALSE)+
+  guides(fill = FALSE)+
+  guides(colour = FALSE)+
+  labs(title = "Trout Bog")+
+  ylab(expression(paste("Chl a (",  mu,"g ", L^-1,")")))+
   theme_bw(base_size = 8)+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 figure<-(chl  + tbchl ) + plot_layout(guides = "collect", ncol = 2)
-ggsave("figures/chlorocompare.png", width = 15, height = 10, units = 'in', figure)
+ggsave("figures/chlorocompare.png", width = 8, height = 5, units = 'in', figure)
 
   xlab('Month')+
   ylab("pH")+
