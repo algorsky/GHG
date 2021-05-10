@@ -90,7 +90,7 @@ CH4<-ggplot(f2TBch4) +
   scale_color_viridis_c(name = var) +
   ylab('Depth (m)') + xlab('') +
   labs(fill = ((expression(paste("C", H[4], " (", mu,"mol ", L^-1,")")))))+
-  theme_bw(base_size = 15) +
+  theme_bw(base_size = 8) +
   scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b, %Y"),
                limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2020,'-10-31'))))
 
@@ -103,11 +103,11 @@ CO2<-ggplot(f2TBco2) +
   scale_color_viridis_c(name = var) +
   ylab('Depth (m)') + xlab('') +
   labs(fill = ((expression(paste("C", O[2], " (", mu,"mol ", L^-1,")")))))+
-  theme_bw(base_size = 15) +
+  theme_bw(base_size = 8) +
   scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b, %Y"),
                limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2020,'-10-31'))))
 
-gas<- (CH4 + CO2) + plot_layout(guides = "collect", ncol = 1)
+gas<- (CH4 + CO2) + plot_layout(ncol = 1)
 ggsave("figures/HeatMap_TB.png", width = 10, height = 6, units = 'in', gas)
 
 #Heat Map Temperature
@@ -160,8 +160,8 @@ temp<-ggplot(f2TBTemp) +
   scale_y_reverse()  +
   scale_color_viridis_c(name = var) +
   ylab('Depth (m)') + xlab('') +
-  labs(fill = ((expression(paste("Temperature (C)")))))+
-  theme_bw(base_size = 15) +
+  labs(fill = ((expression("Temperature " ( degree*C)))))+
+  theme_bw(base_size = 8) +
   scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b, %Y"),
                limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2020,'-10-31'))))
 
@@ -214,10 +214,10 @@ O2<-ggplot(f2TBDO) +
   scale_y_reverse()  +
   scale_color_viridis_c(name = var) +
   ylab('Depth (m)') + xlab('') +
-  labs(fill = ((expression(paste(O[2], " (", mu,"mol ", L^-1,")")))))+
-  theme_bw(base_size = 15) +
+  labs(fill = ((expression(paste(O[2], " (mg" , L^-1,")")))))+
+  theme_bw(base_size = 8) +
   scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b, %Y"),
                limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2020,'-10-31'))))
 
-heatmaps<- (temp+ O2+ CH4 + CO2) + plot_layout(guides = "collect", ncol = 1)
-ggsave("figures/Full_HeatMap_TB.png", width = 25, height = 15, units = 'in', heatmaps)
+heatmaps<- (temp+ O2+ CH4 + CO2) + plot_layout(ncol = 1) + plot_annotation(tag_levels = "A")
+ggsave("figures/Full_HeatMap_TB.png", width = 7, height = 8, units = 'in', heatmaps)
