@@ -186,10 +186,10 @@ temp<- ssbwinter + tbwinter
 ggsave("figures/tempSSBTB.png", width = 8, height = 6, units = 'in', temp)
   
 tempdo2020 <- tempdo %>%
-  filter(date <= as.POSIXct('2021-01-01'))
+  filter(sampledate <= as.POSIXct('2021-01-01') & lake == "TB" & sampledate > as.POSIXct('2019-12-31'))
 
 #Facet_Wrap by Date for Temperature and DO for Trout Bog
-TempWinter<-ggplot(dplyr::filter(tempdo, lake == 'TB'& icecovered == "yes")) + 
+TempWinter<-ggplot(dplyr::filter(tempdo2020, icecovered == "yes")) + 
   geom_point(aes(x = waterTemp_C, y = water_depth_m), size = 2) +
   geom_path(aes(x = waterTemp_C, y = water_depth_m, group = sampledate))+
   scale_y_reverse(name = "Depth (m)") +
@@ -200,15 +200,16 @@ TempWinter<-ggplot(dplyr::filter(tempdo, lake == 'TB'& icecovered == "yes")) +
   theme(legend.position = "none")
 
 TempOpen<-ggplot() + 
-  geom_point(data = dplyr::filter(tempdo, lake == 'TB'& icecovered == "no" & sampledate != as.Date('2020-10-30')), aes(x = waterTemp_C, y = water_depth_m), size = 2) +
-  geom_path(data = dplyr::filter(tempdo, lake == 'TB'& icecovered == "no"& sampledate != as.Date('2020-10-30')),aes(x = waterTemp_C, y = water_depth_m, group = sampledate))+
-  geom_point(data = dplyr::filter(tempdo, lake == 'TB'& icecovered == "no"& sampledate == as.Date('2020-10-30')), aes(x = waterTemp_C, y = water_depth_m), color = "yellow",size = 2) +
-  geom_path(data = dplyr::filter(tempdo, lake == 'TB'& icecovered == "no"& sampledate == as.Date('2020-10-30')),aes(x = waterTemp_C, y = water_depth_m, group = sampledate), color = "yellow")+
+  geom_point(data = dplyr::filter(tempdo2020,icecovered == "no" & sampledate != as.Date('2020-10-30')), aes(x = waterTemp_C, y = water_depth_m), size = 2) +
+  geom_path(data = dplyr::filter(tempdo2020, icecovered == "no" & sampledate != as.Date('2020-10-30')),aes(x = waterTemp_C, y = water_depth_m, group = sampledate))+
+  geom_point(data = dplyr::filter(tempdo2020, icecovered == "no"& sampledate == as.Date('2020-10-30')), aes(x = waterTemp_C, y = water_depth_m), color = "yellow",size = 2) +
+  geom_path(data = dplyr::filter(tempdo2020, icecovered == "no"& sampledate == as.Date('2020-10-30')),aes(x = waterTemp_C, y = water_depth_m, group = sampledate), color = "yellow")+
   scale_y_reverse(name = "Depth (m)") +
   scale_x_continuous(expression("Temperature " ( degree*C)))+
   scale_colour_viridis_c()+
   labs(title = "Open Water")+
   theme_bw(base_size = 8)
+
 
 temperature<-TempWinter + TempOpen
 ggsave("figures/tempTB.png", width = 8, height = 6, units = 'in', temperature)
