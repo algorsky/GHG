@@ -1,4 +1,4 @@
-﻿sampledate,lake,water_depth_m,waterTemp_C,DO_per,DO_mg/L,barometricP_kPa,barometricP_mmhg,barometricP_atm
+﻿sampledate,lake,water_depth_m,waterTemp_C,DO_per,DO_mgL,barometricP_kPa,barometricP_mmhg,barometricP_atm
 1/9/20,SSB,0,0.2,10.4,1.51,101.786,,
 1/9/20,SSB,1,2.1,0,0,101.786,,
 1/9/20,SSB,2,3.8,0,0,101.786,,

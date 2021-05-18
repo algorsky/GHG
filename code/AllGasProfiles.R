@@ -56,18 +56,32 @@ ch4ice<-ggplot(dplyr::filter(onoff, lake == 'TB'| lake == 'SSB')) +
   theme_bw(base_size = 8)+
   theme()
 
-diffgas<- co2ice/ch4ice + plot_layout(guides = "collect")
+diffgas<- co2ice/ch4ice + plot_layout(guides = "collect") + plot_annotation(tag_levels = "A")
 ggsave("figures/diffgas.png", width = 8, height = 6, units = 'in', diffgas)
+
+icegas<- gd%>%
+  filter(icecovered == "yes")%>%
+  mutate(doy = yday(date))
+
+icegas$col <- "2nd Sample"
+icegas$col <- ifelse(icegas$date < as.POSIXct("2020-01-30") |icegas$date == as.POSIXct("2021-01-13")|icegas$date == as.POSIXct("2021-01-14"), "1st Sample", icegas$col)
+icegas$col <- ifelse(icegas$date > as.POSIXct("2020-01-31")|icegas$date == as.POSIXct("2021-02-16")|icegas$date == as.POSIXct("2021-02-17"), "3rd Sample", icegas$col)
+icegas$col <- ifelse(icegas$date == as.POSIXct("2020-03-06")|icegas$date == as.POSIXct("2021-03-02")|icegas$date == as.POSIXct("2020-03-07"), "4th Sample", icegas$col)
+icegas$col <- ifelse(icegas$date == as.POSIXct("2021-03-15"), "5th Sample", icegas$col)
+icegas$col <- ifelse(icegas$date == as.POSIXct("2021-01-13") |icegas$date == as.POSIXct("2021-01-14"), "1st Sample", icegas$col)
+icegas$col <- ifelse(icegas$date == as.POSIXct("2021-02-03") |icegas$date == as.POSIXct("2021-02-02"), "2nd Sample", icegas$col)
+icegas$col <- factor(icegas$col, c("1st Sample", "2nd Sample", "3rd Sample", "4th Sample", "5th Sample"), ordered = TRUE)
+
 
 #On and Off
 co2compare<-ggplot(dplyr::filter(gd, (lake == 'TB'& icecovered == "yes")| (lake == 'SSB' & icecovered == "yes"))) + 
-  geom_point(aes(x = CO2, y = depth, color = year), size = 3) +
+  geom_point(aes(x = CO2, y = depth, shape = col, color = year), size = 3) +
   geom_path(aes(x = CO2, y = depth, group = date, color = year)) +
   facet_wrap(~lake) +
   guides(size = FALSE)+
   scale_y_reverse(name = "Depth (m)") +
-  scale_x_continuous(name = ((expression(paste("C", O[2], " (", mu,"mol ", L^-1,")")))), limits = c(0, 2000))+
   scale_color_manual(values = c('lightblue4','gold'), name = "Year") +
+  scale_x_continuous(name = ((expression(paste("C", O[2], " (", mu,"mol ", L^-1,")")))), limits = c(0, 2000))+
   theme_bw(base_size = 8)
 
 ch4compare<-ggplot(dplyr::filter(gd, (lake == 'TB'& icecovered == "yes")|( lake == 'SSB'& icecovered == "yes"))) + 
@@ -84,6 +98,45 @@ ch4compare<-ggplot(dplyr::filter(gd, (lake == 'TB'& icecovered == "yes")|( lake 
   theme_bw(base_size = 8)+
   theme()
 
+co2compare<-ggplot() + 
+  geom_point(data = dplyr::filter(icegas, (lake == 'TB'& year == 2020)), aes(x = as.Date(doy, origin = as.Date('2020-01-01')), y = CO2, shape = factor(depth), color = year), size = 3) +
+  geom_path(data = dplyr::filter(icegas, (lake == 'TB'& year == 2020)), aes(x = as.Date(doy, origin = as.Date('2020-01-01')), y = CO2, group = depth, color = year))+
+  geom_point(data = dplyr::filter(icegas, (lake == 'TB'& year == 2021)), aes(x = as.Date(doy, origin = as.Date('2020-01-01')), y = CO2, shape = factor(depth), color = year), size = 3) +
+  geom_path(data = dplyr::filter(icegas, (lake == 'TB'& year == 2021)), aes(x = as.Date(doy, origin = as.Date('2020-01-01')), y = CO2, group = depth, color = year))+
+  geom_point(data = dplyr::filter(icegas, (lake == 'SSB'& year == 2020)), aes(x = as.Date(doy, origin = as.Date('2020-01-01')), y = CO2, shape = factor(depth), color = year), size = 3) +
+  geom_path(data = dplyr::filter(icegas, (lake == 'SSB'& year == 2020)), aes(x = as.Date(doy, origin = as.Date('2020-01-01')), y = CO2, group = depth, color = year))+
+  geom_point(data = dplyr::filter(icegas, (lake == 'SSB'& year == 2021)), aes(x = as.Date(doy, origin = as.Date('2020-01-01')), y = CO2, shape = factor(depth), color = year), size = 3) +
+  geom_path(data = dplyr::filter(icegas, (lake == 'SSB'& year == 2021)), aes(x = as.Date(doy, origin = as.Date('2020-01-01')), y = CO2, group = depth, color = year))+
+  guides(size = FALSE)+
+  scale_shape_manual(name = "Depth", values = c(1, 2, 0, 20))+
+  facet_wrap(~lake)+
+  xlab("Date")+
+  scale_x_date(labels = date_format("%b %d"), breaks = "2 week")+
+  scale_color_manual(values = c('lightblue4','gold'), name = "Year") +
+  scale_y_continuous(name = ((expression(paste("C", O[2], " (", mu,"mol ", L^-1,")")))), limits = c(0, 2000))+
+  theme_bw(base_size = 8)
+
+ch4compare<-ggplot()+
+  geom_point(data = dplyr::filter(icegas, (lake == 'TB'& year == 2020)), aes(x = as.Date(doy, origin = as.Date('2020-01-01')), y = CH4, shape = factor(depth), color = year), size = 3) +
+  geom_path(data = dplyr::filter(icegas, (lake == 'TB'& year == 2020)), aes(x = as.Date(doy, origin = as.Date('2020-01-01')), y = CH4, group = depth, color = year))+
+  geom_point(data = dplyr::filter(icegas, (lake == 'TB'& year == 2021)), aes(x = as.Date(doy, origin = as.Date('2020-01-01')), y = CH4, shape = factor(depth), color = year), size = 3) +
+  geom_path(data = dplyr::filter(icegas, (lake == 'TB'& year == 2021)), aes(x = as.Date(doy, origin = as.Date('2020-01-01')), y = CH4, group = depth, color = year))+
+  geom_point(data = dplyr::filter(icegas, (lake == 'SSB'& year == 2020)), aes(x = as.Date(doy, origin = as.Date('2020-01-01')), y = CH4, shape = factor(depth), color = year), size = 3) +
+  geom_path(data = dplyr::filter(icegas, (lake == 'SSB'& year == 2020)), aes(x = as.Date(doy, origin = as.Date('2020-01-01')), y = CH4, group = depth, color = year))+
+  geom_point(data = dplyr::filter(icegas, (lake == 'SSB'& year == 2021)), aes(x = as.Date(doy, origin = as.Date('2020-01-01')), y = CH4, shape = factor(depth), color = year), size = 3) +
+  geom_path(data = dplyr::filter(icegas, (lake == 'SSB'& year == 2021)), aes(x = as.Date(doy, origin = as.Date('2020-01-01')), y = CH4, group = depth, color = year))+
+  guides(size = FALSE)+
+  scale_shape_manual(name = "Depth", values = c(1, 2, 0, 20))+
+  facet_wrap(~lake)+
+  xlab("Date")+
+  scale_x_date(labels = date_format("%b %d"), breaks = "2 week")+
+  scale_color_manual(values = c('lightblue4','gold'), name = "Year") +
+  scale_y_continuous(name = ((expression(paste("C", H[4], " (", mu,"mol ", L^-1,")")))))+
+  theme_bw(base_size = 8)
+
+comparegas<- co2compare/ch4compare + plot_layout(ncol = 1, guides = "collect") + plot_annotation(tag_levels = "A")
+ggsave("figures/comparegas.png", width = 8, height = 6, units = 'in', comparegas)
+
 compare<- gd %>%
   filter(icecovered == "yes")%>%
   group_by(lake, depth, year(date))%>%
@@ -92,17 +145,26 @@ compare<- gd %>%
             minCH4 = min(CH4),
             maxCH4 = max(CH4))
 
+comparewinteropen<- gd %>%
+  filter(lake == "TB" & year == 2020)%>%
+  group_by(icecovered)%>%
+  summarise(minCO2 = min(CO2),
+            maxCO2 = max(CO2),
+            minCH4 = min(CH4),
+            maxCH4 = max(CH4))
+
 compare<-co2compare/ch4compare + plot_layout(guides = "collect")
 ggsave("figures/19-20compare.png", width = 8, height = 6, units = 'in', compare)
 
-summary2020<- gd.2020 %>%
-  group_by(lake, depth, icecovered)%>%
-  summarize(minCO2 = min(CO2)*1000000,
-            maxCO2 = max(CO2)*1000000,
-            minCH4 = min(CH4)*1000000,
-            maxCH4 = max(CH4)*1000000,
-            meanCO2 = mean(CO2)*1000000,
-            meanCH4 = mean(CH4)*1000000) 
+summary2020<- gd %>%
+  filter(lake == "TB")%>%
+  group_by(depth, icecovered)%>%
+  summarize(minCO2 = min(CO2),
+            maxCO2 = max(CO2),
+            minCH4 = min(CH4),
+            maxCH4 = max(CH4),
+            meanCO2 = mean(CO2),
+            meanCH4 = mean(CH4)) 
 
 ssb.gas = read_csv('data/GC2021/SSB_GHG.csv')
 ssb.gas$date = as.Date(ssb.gas$sampledate, format =  "%m/%d/%y")
@@ -154,17 +216,17 @@ CH4<-ggplot(dplyr::filter(gd, lake == 'TB' & year == 2020| lake == 'SSB' & year 
 tempdo = read_csv('data/ChemTempDO/tempdoSSB.csv')
 tempdo$sampledate = as.Date(tempdo$sampledate, format =  "%m/%d/%y")
 tempdo<- tempdo%>%
-  mutate(icecovered = ifelse(month(sampledate)%in% 1:3,"yes",
-                             "no"))%>%
+  mutate(icecovered = ifelse(month(sampledate)%in% 1:3,"Ice Covered",
+                             "Open Water"))%>%
   mutate(doy = yday(sampledate))
-
+tempdo$icecovered<- factor(tempdo$icecovered, levels = c("Ice Covered", "Open Water"))
 tempdowinter<- tempdo%>%
   filter(month(sampledate)%in% 1:3)%>%
   mutate(Year = year(sampledate))
 
-ssbwinter<-ggplot(dplyr::filter(tempdowinter, lake == 'SSB')) + 
-  geom_point(aes(x = waterTemp_C, y = water_depth_m, color = factor(Year)), size = 2) +
-  geom_path(aes(x = waterTemp_C, y = water_depth_m, color = factor(Year), group = sampledate))+
+ssbwinterO2<-ggplot(dplyr::filter(tempdowinter, lake == 'SSB')) + 
+  geom_point(aes(x = DO_mgL, y = water_depth_m, color = factor(Year)), size = 2) +
+  geom_path(aes(x = DO_mgL, y = water_depth_m, color = factor(Year), group = sampledate))+
   scale_color_manual(name = 'Year',values = c('gray','lightblue4','gold')) +
   scale_y_reverse(name = "Depth (m)") +
   scale_x_continuous(name = "Temperature (C)")+
@@ -189,9 +251,20 @@ tempdo2020 <- tempdo %>%
   filter(sampledate <= as.POSIXct('2021-01-01') & lake == "TB" & sampledate > as.POSIXct('2019-12-31'))
 
 #Facet_Wrap by Date for Temperature and DO for Trout Bog
+lab_dates <- pretty(tempdo2020$sampledate)
+as.Date(lab_dates, format =  "%m/%d/%y")
+ggplot(tempdo2020)+
+  geom_point(aes(x = waterTemp_C, y = water_depth_m, color = sampledate), size = 2)+
+  geom_path(aes(x = waterTemp_C, y = water_depth_m, group = sampledate, color = sampledate))+
+  scale_colour_viridis_c(trans = "date", name = "")+
+  scale_y_reverse(name = "Depth (m)") +
+  scale_x_continuous(expression("Temperature " ( degree*C)))+
+  facet_wrap(~icecovered, scales = "free")
+ggsave("figures/tempcompareTB.png", width = 8, height = 6, units = 'in')
+
 TempWinter<-ggplot(dplyr::filter(tempdo2020, icecovered == "yes")) + 
-  geom_point(aes(x = waterTemp_C, y = water_depth_m), size = 2) +
-  geom_path(aes(x = waterTemp_C, y = water_depth_m, group = sampledate))+
+  geom_point(aes(x = waterTemp_C, y = water_depth_m, color = sampledate), size = 2) +
+  geom_path(aes(x = waterTemp_C, y = water_depth_m, group = sampledate, color = sampledate))+
   scale_y_reverse(name = "Depth (m)") +
   scale_x_continuous(expression("Temperature " ( degree*C)))+
   scale_colour_viridis_c()+
@@ -200,10 +273,10 @@ TempWinter<-ggplot(dplyr::filter(tempdo2020, icecovered == "yes")) +
   theme(legend.position = "none")
 
 TempOpen<-ggplot() + 
-  geom_point(data = dplyr::filter(tempdo2020,icecovered == "no" & sampledate != as.Date('2020-10-30')), aes(x = waterTemp_C, y = water_depth_m), size = 2) +
-  geom_path(data = dplyr::filter(tempdo2020, icecovered == "no" & sampledate != as.Date('2020-10-30')),aes(x = waterTemp_C, y = water_depth_m, group = sampledate))+
-  geom_point(data = dplyr::filter(tempdo2020, icecovered == "no"& sampledate == as.Date('2020-10-30')), aes(x = waterTemp_C, y = water_depth_m), color = "yellow",size = 2) +
-  geom_path(data = dplyr::filter(tempdo2020, icecovered == "no"& sampledate == as.Date('2020-10-30')),aes(x = waterTemp_C, y = water_depth_m, group = sampledate), color = "yellow")+
+  geom_point(data = dplyr::filter(tempdo2020,icecovered == "no" & sampledate != as.Date('2020-10-30')), aes(x = waterTemp_C, y = water_depth_m, color = as.Date(sampledate)), size = 2) +
+  geom_path(data = dplyr::filter(tempdo2020, icecovered == "no" & sampledate != as.Date('2020-10-30')),aes(x = waterTemp_C, y = water_depth_m, group = sampledate, color = as.Date(sampledate)))+
+  geom_point(data = dplyr::filter(tempdo2020, icecovered == "no"& sampledate == as.Date('2020-10-30')), aes(x = waterTemp_C, y = water_depth_m, color = as.Date(sampledate)), shape = 19,size = 2) +
+  geom_path(data = dplyr::filter(tempdo2020, icecovered == "no"& sampledate == as.Date('2020-10-30')),aes(x = waterTemp_C, y = water_depth_m, group = sampledate, color = as.Date(sampledate)))+
   scale_y_reverse(name = "Depth (m)") +
   scale_x_continuous(expression("Temperature " ( degree*C)))+
   scale_colour_viridis_c()+

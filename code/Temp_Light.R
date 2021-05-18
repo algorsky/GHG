@@ -113,7 +113,10 @@ for(i in 1:7) {
 }
 summer = light.list %>%  bind_rows() 
 names(summer) = c('Date.GMT','Temp.F','Intensity.lum.ft2','HostConnect', 'ButtonDown','ButtonUp','EOF','depth', 'Temp.C')
-ggplot(summer) +
+
+autumnturnover<- summer %>%
+  filter(Date.GMT > '2020-09-30' & Date.GMT < '2020-10-26')
+ggplot(autumnturnover) +
   geom_line(aes(x = Date.GMT, y = Temp.C, color = depth, group = depth)) +
   scale_colour_viridis_c() +
   theme_bw() +
@@ -126,32 +129,32 @@ write.csv(summer, "data/summertempSSBbuoy.csv", row.names = FALSE)
 #Plotting Temperature
 p.t1 = ggplot(light.2020) +
   geom_line(aes(x = as.Date(Date.GMT), y = Temp.C, color = depth, group = depth)) +
-  scale_colour_viridis_c() +
+  scale_colour_viridis_c(name = "Depth (m)") +
   scale_x_date(labels = date_format("%b"), breaks = "1 month", limits = as.Date(c('2019-12-01','2020-05-01')))+
   theme_bw(base_size = 8) +
   geom_vline(xintercept = as.numeric(as.Date("2020-04-26")),  linetype = "dashed", color = "black")+
   # facet_wrap(vars(depth)) +
-  labs(title = 'Sparkling Bog 2020') + ylab('Temp (degC)') + xlab('Date') +
+  labs(title = 'South Sparkling Bog 2020') + ylab('Temp (degC)') + xlab('Date') +
   NULL
 
 p.t2 = ggplot(light.2021) +
   geom_line(aes(x = as.Date(Date.GMT), y = Temp.C, color = depth, group = depth)) +
-  scale_colour_viridis_c() +
+  scale_colour_viridis_c(name = "Depth (m)") +
   scale_x_date(labels = date_format("%b"), breaks = "1 month", limits = as.Date(c('2020-12-01','2021-05-01')))+
   theme_bw(base_size = 8) +
   geom_vline(xintercept = as.numeric(as.Date("2021-04-06")),  linetype = "dashed", color = "black")+
   # facet_wrap(vars(depth)) +
-  labs(title = 'Sparkling Bog 2021') + ylab('Temp (degC)') + xlab('Date') +
+  labs(title = 'South Sparkling Bog 2021') + ylab('Temp (degC)') + xlab('Date') +
   NULL
 
 p.t3 = ggplot(light.2019) +
   geom_line(aes(x = as.Date(Date.GMT), y = Temp.C, color = depth, group = depth)) +
-  scale_colour_viridis_c() +
+  scale_colour_viridis_c(name = "Depth (m)") +
   scale_x_date(labels = date_format("%b"), breaks = "1 month", limits = as.Date(c('2018-12-01','2019-05-01')))+
   theme_bw(base_size = 8) +
   geom_vline(xintercept = as.numeric(as.Date("2019-04-13")),  linetype = "dashed", color = "black")+
   # facet_wrap(vars(depth)) +
-  labs(title = 'Sparkling Bog 2019') + ylab('Temp (degC)') + xlab('Date') +
+  labs(title = 'South Sparkling Bog 2019') + ylab('Temp (degC)') + xlab('Date') +
   NULL
 
 #Combo Plot
@@ -173,38 +176,38 @@ ggsave('figures/SparklingBogTempString_Surf.png',width = 7, height = 3)
 #Plotting Light
 p.l1 = ggplot(dplyr::filter(light.2020, depth != 1)) +
   geom_line(aes(x = as.Date(Date.GMT), y = metric, color = depth, group = depth)) +
-  scale_colour_viridis_c() +
+  scale_colour_viridis_c(name = "Depth (m)") +
   theme_bw(base_size = 8) +
   scale_x_date(labels = date_format("%b"), breaks = "1 month", limits = as.Date(c('2019-12-01','2020-05-01')))+
   geom_vline(xintercept = as.numeric(as.Date("2020-04-26")),  linetype = "dashed", color = "black")+
   # facet_wrap(vars(depth)) +
   ylim(0, 1500)+
   ylab(expression(paste("Light (lum/", m^2,")")))+
-  labs(title = 'Sparkling Bog 2020') + 
+  labs(title = 'South Sparkling Bog 2020') + 
   xlab('Date') +
   NULL
 
 p.l2 = ggplot(dplyr::filter(light.2021, depth != 1)) +
   geom_line(aes(x = as.Date(Date.GMT), y = metric, color = depth, group = depth)) +
-  scale_colour_viridis_c() +
+  scale_colour_viridis_c(name = "Depth (m)") +
   scale_x_date(labels = date_format("%b"), breaks = "1 month", limits = as.Date(c('2020-12-01','2021-05-01')))+
   theme_bw(base_size = 8) +
   geom_vline(xintercept = as.numeric(as.Date("2021-04-06")),  linetype = "dashed", color = "black")+
   ylim(0, 1500)+
   ylab(expression(paste("Light (lum/", m^2,")")))+
-  labs(title = 'Sparkling Bog 2020') + 
+  labs(title = 'South Sparkling Bog 2021') + 
   xlab('Date') +
   NULL
 
 p.l3 = ggplot(dplyr::filter(light.2019, depth != 1)) +
   geom_line(aes(x = as.Date(Date.GMT), y = metric, color = depth, group = depth)) +
-  scale_colour_viridis_c() +
+  scale_colour_viridis_c(name = "Depth (m)") +
   theme_bw(base_size = 8) +
   scale_x_date(labels = date_format("%b"), breaks = "1 month", limits = as.Date(c('2018-12-01','2019-05-01')))+
   geom_vline(xintercept = as.numeric(as.Date("2019-04-13")),  linetype = "dashed", color = "black")+
   ylim(0,1500)+
   ylab(expression(paste("Light (lum/", m^2,")")))+
-  labs(title = 'Sparkling Bog 2020') + 
+  labs(title = 'South Sparkling Bog 2019') + 
   xlab('Date') +
   NULL
 
@@ -220,7 +223,7 @@ surfaceDO<-light %>%
   scale_x_date(labels = date_format("%b"), breaks = "1 month")+
   scale_color_manual(name = 'Year', values = c('gray','lightblue4','gold')) +
   theme_bw(base_size = 8) +
-  labs(title = 'Sparkling Bog 2019-2021') + ylab('Light') + xlab('Date')
+  ylab('Light') + xlab('Date')
 ggsave("figures/surfacebuoyDO.png", width = 15, height = 10, units = 'in', surfaceDO)
 
 ggplot(filter(light.2020, depth == 1)) +
@@ -229,8 +232,7 @@ ggplot(filter(light.2020, depth == 1)) +
   geom_line(data = filter(light.2019, depth == 1), aes(x = as.Date(Date.GMT), y = metric, color = '2019'), alpha = 0.7) +
   theme_bw() +
   scale_color_manual(name = 'Year',values = c('gray','lightblue4','gold')) +
-  labs(title = 'Surface Light Transmission: Sparkling Bog 2019-2021') +  
-  ylab(expression(paste("Light (lum/", m^2,")")))+
+  ylab(expression(paste("Surface Light Intensity (lum/", m^2,")")))+
  xlab('Date')+
   geom_vline(xintercept = as.numeric(as.Date("2019-04-13")),  linetype = "dashed", color = "gray")+
   geom_vline(xintercept = as.numeric(as.Date("2021-04-06")),  linetype = "dashed", color = "gold")+

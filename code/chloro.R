@@ -68,7 +68,7 @@ surface<- chlsurf/tbchlsurf
 ggsave("figures/chlbogsurf.png", width = 8, height = 6, units = 'in', surface)
 
 chl<-ggplot(dplyr::filter(ssb.chloro, depth != 0 & (Year == 2019 |Year == 2020 | Year == 2021)), aes(x = factor(sampledate), y = chlor, group = factor(sampledate), color = depth, fill = Year, alpha = 0.2))+
-  geom_boxplot()+ #might help better display the median and range of your data.
+  geom_boxplot(outlier.shape = NA)+ #might help better display the median and range of your data.
   geom_jitter(alpha = 0.5, size = 3)+ #alpha plays around with the transparency of the points
   #jitter makes it so the points aren't on top of each other
   guides(alpha = FALSE)+
@@ -84,7 +84,7 @@ chl<-ggplot(dplyr::filter(ssb.chloro, depth != 0 & (Year == 2019 |Year == 2020 |
 ggsave("figures/chl.png", width = 15, height = 6, units = 'in', chl)
 
 tbchl<-ggplot(dplyr::filter(tb.chloro, depth != 0), aes(x = factor(sampledate), y = chlor, group = factor(sampledate), color = depth, fill = Year, alpha = 0.2))+
-  geom_boxplot()+ #might help better display the median and range of your data.
+  geom_boxplot(outlier.shape = NA)+ #might help better display the median and range of your data.
   geom_jitter(alpha = 0.5, size = 3)+ #alpha plays around with the transparency of the points
   #jitter makes it so the points aren't on top of each other
   scale_colour_viridis_c()+

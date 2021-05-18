@@ -221,3 +221,110 @@ ggplot()+
 
 ggplot(buoybottom)+
   geom_line(aes(x = Date.GMT, y = Temp.C))
+
+fluxTBCH4neg<- fluxTBCH4%>%
+   filter(ch4_flux < 0)
+fluxTBCO2neg<- fluxTBCO2%>%
+  filter(co2_flux < 0)
+
+colors <- c("Air Temperature" = "gray69","1 m Water Temperature" = "navy", "7 m Water Temperature" = "chocolate4")
+theme_set(theme_bw(base_size = 8))
+iceoff<-ggplot()+
+  geom_path(data = dplyr::filter(fluxTBCH4, DOY < 110), aes(x = date, y = (airtemp*2), color = "Air Temperature"))+
+  geom_path(data = dplyr::filter(fluxTBCH4, DOY > 112 & DOY <140), aes(x = date, y = (airtemp*2), color = "Air Temperature"))+
+  geom_path(data = buoysurf, aes(x = as.Date(Date.GMT), y = Temp.C*2, color = "1 m Water Temperature"))+
+  geom_path(data = buoybottom, aes(x = as.Date(Date.GMT), y = Temp.C*2, color = "7 m Water Temperature"))+
+  geom_point(data = iceoff, aes(x = as.Date(DOY, origin = as.Date('2020-01-01')), y = ch4_flux *1000), size = 1, color = "red2", alpha = 0.2)+
+  scale_y_continuous(limits = c(-20, 40), breaks = seq(-20, 40, 10))+
+  scale_y_continuous(sec.axis = sec_axis(~./2, name = expression("Temperature " ( degree*C))))+ 
+  xlab("")+
+  ylab(expression(paste("C", H[4], " flux (", n,"mol ", m^-2, s^-1,")")))+
+  geom_hline(yintercept = 0, color = "black", alpha = 0.4)+
+  geom_vline(xintercept = as.numeric(as.Date("2020-04-26")),  linetype = "dashed", color = "black")+
+  scale_color_manual(values = colors)+
+  theme(legend.position = "top", legend.title = element_blank())
+
+#Summer
+# 2021
+light.list = list()
+for(i in 1:7) {
+  light.list[[i]] = read_csv(list.files(path='data/Buoy/summer/', full.names = TRUE)[i], skip = 1) %>%
+    # read_csv('2018_2019_underice/Temp/SB_1.csv', skip = 1) %>%
+    mutate(depth = i)%>%
+    mutate(Temp.C = 5/9 * (`Temp, (*F)` - 32))
+}
+summer = light.list %>%  bind_rows() 
+names(summer) = c('Date.GMT','Temp.F','Intensity.lum.ft2','HostConnect', 'ButtonDown','ButtonUp','EOF','depth', 'Temp.C')
+
+autumnturnover<- summer %>%
+  filter(Date.GMT > '2020-09-27' & Date.GMT < '2020-10-26')
+
+turnoversurf <- autumnturnover %>%
+  filter(depth == 1)%>%
+  mutate(date = as.Date(Date.GMT))
+turnoverbottom<- autumnturnover %>%
+  filter(depth == 7)%>%
+  mutate(date = as.Date(Date.GMT))
+
+autumn<- fluxTBCH4 %>%
+  filter(date > '2020-09-27' & date < '2020-10-26')%>%
+  mutate(datetime = paste(date, time))
+autumn$datetime<- as.POSIXct(autumn$datetime)
+colors <- c("Air Temperature" = "gray69","1 m Water Temperature" = "navy", "7 m Water Temperature" = "chocolate4")
+theme_set(theme_bw(base_size = 8))
+turnover<-ggplot()+
+  geom_path(data = dplyr::filter(autumn, DOY < 289), aes(x = datetime, y = (airtemp*2), color = "Air Temperature"), group = 1)+
+  geom_path(data = dplyr::filter(autumn, DOY> 297), aes(x = datetime, y = (airtemp*2), color = "Air Temperature"), group = 1)+
+geom_point(data = autumn, aes(x = datetime, y = ch4_flux *1000), size = 1, color = "red2", alpha = 0.2)+
+  geom_path(data = turnoversurf, aes(x = (Date.GMT), y = Temp.C*2, color = "1 m Water Temperature"), group = 1)+
+  geom_path(data = turnoverbottom, aes(x = (Date.GMT), y = Temp.C*2, color = "7 m Water Temperature"), group = 1)+
+  scale_x_datetime(breaks = date_breaks("5 days"), labels = date_format("%b %d"))+ 
+scale_y_continuous(limits = c(-20, 40), breaks = seq(-20, 40, 10))+
+  scale_y_continuous(sec.axis = sec_axis(~./2, name = expression("Temperature " ( degree*C))))+ 
+  xlab("")+
+  ylab(expression(paste("C", H[4], " flux (", n,"mol ", m^-2, s^-1,")")))+
+  geom_hline(yintercept = 0, color = "black", alpha = 0.4)+
+  scale_color_manual(values = colors)+
+  theme(legend.position = "top", legend.title = element_blank())
+
+ggsave("figures/fluxturnover.png", width = 8, height = 6, units = 'in', turnover)
+
+
+ggplot()+
+  geom_path(data = dplyr::filter(autumn, DOY < 289), aes(x = datetime, y = (airtemp*2), color = "Air Temperature"), group = 1)+
+  geom_path(data = dplyr::filter(autumn, DOY> 297), aes(x = datetime, y = (airtemp*2), color = "Air Temperature"),group = 1)+
+  geom_path(data = turnoversurf, aes(x = (Date.GMT), y = Temp.C*2, color = "1 m Water Temperature"), group = 1)+
+  geom_path(data = turnoverbottom, aes(x = (Date.GMT), y = Temp.C*2, color = "7 m Water Temperature"), group = 1)+
+  geom_point(data = autumn, aes(x = datetime, y = ch4_flux *1000), size = 1, color = "red2", alpha = 0.2)+
+  scale_y_continuous(limits = c(-20, 40), breaks = seq(-20, 40, 10))+
+  scale_y_continuous(sec.axis = sec_axis(~./2, name = expression("Temperature " ( degree*C))))+ 
+  xlab("")+
+  ylab(expression(paste("C", H[4], " flux (", n,"mol ", m^-2, s^-1,")")))+
+  geom_hline(yintercept = 0, color = "black", alpha = 0.4)+
+  geom_vline(xintercept = as.numeric(as.Date("2020-04-26")),  linetype = "dashed", color = "black")+
+  scale_color_manual(values = colors)+
+  theme(legend.position = "top", legend.title = element_blank())
+
+
+spring<- fluxTBCH4 %>%
+  filter(date > '2020-03-15' & date < '2020-05-19')%>%
+  mutate(datetime = paste(date, time))
+spring$datetime<- as.POSIXct(spring$datetime)
+colors <- c("Air Temperature" = "gray69","1 m Water Temperature" = "navy", "7 m Water Temperature" = "chocolate4")
+theme_set(theme_bw(base_size = 8))
+springturn<-ggplot()+
+  geom_path(data = dplyr::filter(spring, DOY < 110), aes(x = datetime, y = (airtemp*2), color = "Air Temperature"), group = 1)+
+  geom_path(data = dplyr::filter(spring, DOY> 112), aes(x = datetime, y = (airtemp*2), color = "Air Temperature"), group = 1)+
+  geom_point(data = spring, aes(x = datetime, y = ch4_flux *1000), size = 1, color = "red2", alpha = 0.2)+
+  geom_path(data = buoysurf, aes(x = (Date.GMT), y = Temp.C*2, color = "1 m Water Temperature"), group = 1)+
+  geom_path(data = buoybottom, aes(x = (Date.GMT), y = Temp.C*2, color = "7 m Water Temperature"), group = 1)+
+  scale_x_datetime(breaks = date_breaks("5 days"), labels = date_format("%b %d"))+ 
+  scale_y_continuous(limits = c(-20, 40), breaks = seq(-20, 40, 10))+
+  scale_y_continuous(sec.axis = sec_axis(~./2, name = expression("Temperature " ( degree*C))))+ 
+  xlab("")+
+  ylab(expression(paste("C", H[4], " flux (", n,"mol ", m^-2, s^-1,")")))+
+  geom_hline(yintercept = 0, color = "black", alpha = 0.4)+
+  scale_color_manual(values = colors)+
+  theme(legend.position = "top", legend.title = element_blank())
+
+ggsave("figures/fluxspring.png", width = 8, height = 6, units = 'in', springturn)

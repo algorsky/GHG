@@ -18,7 +18,7 @@ summary<-ice%>%
 
 snow$Month = factor(snow$Month, levels = c("November", "December", "January", "February", "March", "April", "Annual Total"))
 
-snow<-ggplot(data = snow, aes(x = Month, AvgSnow_cm, fill = factor(Year)))+
+snowplot<-ggplot(data = snow, aes(x = Month, AvgSnow_cm, fill = factor(Year)))+
   geom_bar(stat = "identity",position = 'dodge')+
   scale_fill_manual(values = c("gray",'lightblue4','gold'), name = "Year") +
   xlab("Month")+
@@ -40,6 +40,7 @@ SSBice<-ggplot(dplyr::filter(ice_snow, Lake == "SSB"), aes(x = as.Date(doy, orig
   ylab("Thickness(cm)")+
   xlab("Sampling Month")+
   labs(title = "South Sparkling Bog")+
+  ylim(0, 90)+
   scale_fill_manual(values = c("white",'gray88','gray4'), name = "") +
   guides(color = FALSE)+
   scale_color_manual(values = c("black",'black','black'), name = "") +
@@ -52,6 +53,7 @@ TBice<-ggplot(dplyr::filter(ice_snow, Lake == "TB"), aes(x = as.Date(doy, origin
   ylab("Thickness(cm)")+
   xlab("Sampling Month")+
   labs(title = "Trout Bog")+
+  ylim(0, 90)+
   scale_fill_manual(values = c("white",'gray88','gray4'), name = "") +
   guides(color = FALSE)+
   scale_color_manual(values = c("black",'black','black'), name = "") +

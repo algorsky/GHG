@@ -7,14 +7,15 @@ library(scales)
 ################## Temp/Light Sensor ##################
 buoy.2020 = read_csv('data/Buoy/temp.buoy2020.csv')
 buoy.2020<- buoy.2020%>%
-  mutate(sampledate = ymd_hms("2009-08-07 00:00:01", tz = "America/New_York"))
+  mutate(sampledate = as.Date(Date.GMT, tz = "America/New_York"))
 
 #Plotting Temperature
 buoy.temp2020<-ggplot(buoy.2020) +
-  geom_line(aes(x = Date.GMT, y = Temp.C, color = depth, group = depth)) +
+  geom_line(aes(x = as.Date(sampledate), y = Temp.C, color = depth, group = depth)) +
   scale_colour_viridis_c() +
   theme_bw() +
   # facet_wrap(vars(depth)) +
+  scale_x_date(labels = date_format("%b"), breaks = "1 month", limits = as.Date(c('2019-11-01','2020-11-01')))+
   labs(title = 'Sparkling Bog 2020') + ylab('Temp (degC)') + xlab('Date') +
   NULL
 ggsave("figures/buoytemp2020.png", width = 7, height = 3, units = 'in', buoy.temp2020)

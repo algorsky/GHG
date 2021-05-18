@@ -104,8 +104,8 @@ theme_set(theme_bw())
 tempgap<- ggplot()+
   geom_path(data = dplyr::filter(fluxTBCH4, DOY < 110), aes(x = date, y = (airtemp), color = "Air Temperature"))+
   geom_path(data = dplyr::filter(fluxTBCH4, DOY > 112), aes(x = date, y = (airtemp), color = "Air Temperature"))+
-  geom_path(data = buoysurf, aes(x = date, y = Temp.C, color = "Surface Temperature"))+
-  geom_path(data = buoybottom, aes(x = date, y = Temp.C, color = "Bottom Temperature"))+
+  geom_smooth(data = buoysurf, aes(x = date, y = Temp.C, color = "Surface Temperature"))+
+  geom_smooth(data = buoybottom, aes(x = date, y = Temp.C, color = "Bottom Temperature"))+
   ylab("Temperature (C)")+
   xlab("")+
   scale_color_manual(values = colors)+
