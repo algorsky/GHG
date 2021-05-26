@@ -59,29 +59,27 @@ sum(fallch4$mean) * 86400 * 0.001
 
 #CH4 Flux (µmol m-2 s-1)
 ch4<-ggplot()+
-  geom_point(data = fluxTBCH4, aes(x = date, y = ch4_flux *1000), size = 0.05, color = "gray", alpha = 0.5)+
+  geom_point(data = fluxTBCH4, aes(x = date, y = ch4_flux *1000), size = 0.05, color = "gray", alpha = 0.9)+
   geom_point(data = TBch4mean, aes( x = date, y = mean*1000), size = 0.9, color = "red2")+
   geom_vline(xintercept = as.numeric(as.Date("2020-04-26")),  linetype = "dashed", color = "black")+
-  geom_vline(xintercept = as.numeric(as.Date("2020-10-01")),  linetype = "dashed", color = "black")+
   geom_hline(yintercept = 0, color = "black", alpha = 0.4)+
   xlab("")+
   scale_y_continuous(limits = c(-20, 40), breaks = seq(-20, 40, 10))+
   scale_x_date(date_labels="%b", date_breaks  ="1 month")+
   ylab(expression(paste("C", H[4], " flux (", n,"mol ", m^-2, s^-1,")")))+
-  theme_bw(base_size = 8)
+  theme_bw(base_size = 10)
 
 co2<- ggplot()+
-  geom_point(data = fluxTBCO2, aes(x = date, y = co2_flux), size = 0.05, color = "gray", alpha = 0.5)+
-  geom_point(data = TBco2mean, aes(x = date, y = mean), color = "turquoise4", size = 0.75)+
+  geom_point(data = fluxTBCO2, aes(x = date, y = co2_flux), size = 0.05, color = "gray", alpha = 0.9)+
+  geom_point(data = TBco2mean, aes(x = date, y = mean), color = "turquoise4", size = 0.9)+
   geom_vline(xintercept = as.numeric(as.Date("2020-04-26")),  linetype = "dashed", color = "black")+
-  geom_vline(xintercept = as.numeric(as.Date("2020-10-01")),  linetype = "dashed", color = "black")+
   geom_hline(yintercept = 0, color = "black", alpha = 0.4)+
   scale_y_continuous(limits = c(-5, 5), breaks = seq(-5, 5, 2))+
   xlab("")+
   ylab("CO2 Flux (µmol m-2 s-1)")+
   ylab(expression(paste("C", O[2], " flux (", µ,"mol ", m^-2, s^-1,")")))+
   scale_x_date(date_labels="%b", date_breaks  ="1 month")+
-  theme_bw(base_size = 8)+
+  theme_bw(base_size = 10)+
   theme(legend.position = "bottom", legend.title = element_blank())
 
 gas2<-ch4/co2 + plot_layout(ncol = 1)+plot_annotation(tag_levels = "A")
@@ -183,7 +181,7 @@ buoybottom<- light.2020 %>%
 
 colors <- c("Air Temperature" = "gray69","1 m Water Temperature" = "navy", "7 m Water Temperature" = "chocolate4")
 theme_set(theme_bw(base_size = 8))
-iceoff<-ggplot()+
+ggplot()+
   geom_path(data = dplyr::filter(fluxTBCH4, DOY < 110), aes(x = date, y = (airtemp*2), color = "Air Temperature"))+
   geom_path(data = dplyr::filter(fluxTBCH4, DOY > 112 & DOY <140), aes(x = date, y = (airtemp*2), color = "Air Temperature"))+
   geom_path(data = buoysurf, aes(x = as.Date(Date.GMT), y = Temp.C*2, color = "1 m Water Temperature"))+
@@ -246,6 +244,7 @@ iceoff<-ggplot()+
 
 #Summer
 # 2021
+surfaceTB<- read_csv('data/Buoy/TB_2020.csv')
 light.list = list()
 for(i in 1:7) {
   light.list[[i]] = read_csv(list.files(path='data/Buoy/summer/', full.names = TRUE)[i], skip = 1) %>%
@@ -259,9 +258,9 @@ names(summer) = c('Date.GMT','Temp.F','Intensity.lum.ft2','HostConnect', 'Button
 autumnturnover<- summer %>%
   filter(Date.GMT > '2020-09-27' & Date.GMT < '2020-10-26')
 
-turnoversurf <- autumnturnover %>%
-  filter(depth == 1)%>%
-  mutate(date = as.Date(Date.GMT))
+turnoversurf<- surfaceTB %>%
+  filter(date_time_UTC > '2020-09-27' & date_time_UTC < '2020-10-26')
+
 turnoverbottom<- autumnturnover %>%
   filter(depth == 7)%>%
   mutate(date = as.Date(Date.GMT))
@@ -270,13 +269,13 @@ autumn<- fluxTBCH4 %>%
   filter(date > '2020-09-27' & date < '2020-10-26')%>%
   mutate(datetime = paste(date, time))
 autumn$datetime<- as.POSIXct(autumn$datetime)
-colors <- c("Air Temperature" = "gray69","1 m Water Temperature" = "navy", "7 m Water Temperature" = "chocolate4")
-theme_set(theme_bw(base_size = 8))
+
+theme_set(theme_bw(base_size = 10))
 turnover<-ggplot()+
   geom_path(data = dplyr::filter(autumn, DOY < 289), aes(x = datetime, y = (airtemp*2), color = "Air Temperature"), group = 1)+
   geom_path(data = dplyr::filter(autumn, DOY> 297), aes(x = datetime, y = (airtemp*2), color = "Air Temperature"), group = 1)+
-geom_point(data = autumn, aes(x = datetime, y = ch4_flux *1000), size = 1, color = "red2", alpha = 0.2)+
-  geom_path(data = turnoversurf, aes(x = (Date.GMT), y = Temp.C*2, color = "1 m Water Temperature"), group = 1)+
+geom_point(data = autumn, aes(x = datetime, y = ch4_flux *1000, color = "Methane"), size = 1, alpha = 0.2)+
+  geom_path(data = turnoversurf, aes(x = (date_time_UTC), y = temp_minidot_c*2, color = "1 m Water Temperature"), group = 1)+
   geom_path(data = turnoverbottom, aes(x = (Date.GMT), y = Temp.C*2, color = "7 m Water Temperature"), group = 1)+
   scale_x_datetime(breaks = date_breaks("5 days"), labels = date_format("%b %d"))+ 
 scale_y_continuous(limits = c(-20, 40), breaks = seq(-20, 40, 10))+
@@ -288,6 +287,18 @@ scale_y_continuous(limits = c(-20, 40), breaks = seq(-20, 40, 10))+
   theme(legend.position = "top", legend.title = element_blank())
 
 ggsave("figures/fluxturnover.png", width = 8, height = 6, units = 'in', turnover)
+
+windfall<-ggplot()+
+  geom_path(data = dplyr::filter(autumn, DOY < 289), aes(x = datetime, y = wind_speed*20, color = "Wind Speed (m/s)"), group = 1)+
+  geom_path(data = dplyr::filter(autumn, DOY> 297), aes(x = datetime, y = wind_speed*20, color = "Wind Speed (m/s)"), group = 1)+
+  geom_point(data = autumn, aes(x = datetime, y = ch4_flux *1000, color = "Methane"), size = 1, alpha = 0.2)+
+  scale_y_continuous(sec.axis = sec_axis(~./20, name = "Wind Speed (m/s)"))+ 
+  xlab("")+
+  ylab(expression(paste("C", H[4], " flux (", n,"mol ", m^-2, s^-1,")")))+
+  geom_hline(yintercept = 0, color = "black", alpha = 0.4)+
+  scale_color_manual(values = colors)+
+  theme_bw(base_size = 10)+
+  theme(legend.position = "top", legend.title = element_blank())
 
 
 ggplot()+
@@ -305,26 +316,53 @@ ggplot()+
   scale_color_manual(values = colors)+
   theme(legend.position = "top", legend.title = element_blank())
 
+buoy.2020 = read_csv('data/Buoy/2020Trout/TB_2019_underice_chla.csv')
+buoyspring<- buoy.2020%>%
+  filter(date_time_UTC > '2020-03-15' & date_time_UTC < '2020-05-19')
+
+ggplot(data = buoy.2020)+
+  geom_line(aes(x = date_time_UTC, y = tempC_93_cm), color = "red")+
+  geom_line(aes(x = date_time_UTC, y = tempC_768_cm), color = "blue")+
+  theme_bw()
 
 spring<- fluxTBCH4 %>%
   filter(date > '2020-03-15' & date < '2020-05-19')%>%
   mutate(datetime = paste(date, time))
 spring$datetime<- as.POSIXct(spring$datetime)
-colors <- c("Air Temperature" = "gray69","1 m Water Temperature" = "navy", "7 m Water Temperature" = "chocolate4")
-theme_set(theme_bw(base_size = 8))
+colors <- c("Air Temperature" = "gray69","1 m Water Temperature" = "navy", "7 m Water Temperature" = "chocolate4", "Wind Speed (m/s)" = 'gray30', "Methane" = "red2")
+theme_set(theme_bw(base_size = 10))
 springturn<-ggplot()+
   geom_path(data = dplyr::filter(spring, DOY < 110), aes(x = datetime, y = (airtemp*2), color = "Air Temperature"), group = 1)+
   geom_path(data = dplyr::filter(spring, DOY> 112), aes(x = datetime, y = (airtemp*2), color = "Air Temperature"), group = 1)+
-  geom_point(data = spring, aes(x = datetime, y = ch4_flux *1000), size = 1, color = "red2", alpha = 0.2)+
-  geom_path(data = buoysurf, aes(x = (Date.GMT), y = Temp.C*2, color = "1 m Water Temperature"), group = 1)+
-  geom_path(data = buoybottom, aes(x = (Date.GMT), y = Temp.C*2, color = "7 m Water Temperature"), group = 1)+
+  geom_point(data = spring, aes(x = datetime, y = ch4_flux *1000, color = "Methane"), size = 1, alpha = 0.2)+
+  geom_path(data = buoyspring, aes(x = (date_time_UTC), y = tempC_93_cm*2, color = "1 m Water Temperature"), group = 1)+
+  geom_path(data = buoyspring, aes(x = (date_time_UTC), y = tempC_768_cm*2, color = "7 m Water Temperature"), group = 1)+
   scale_x_datetime(breaks = date_breaks("5 days"), labels = date_format("%b %d"))+ 
   scale_y_continuous(limits = c(-20, 40), breaks = seq(-20, 40, 10))+
   scale_y_continuous(sec.axis = sec_axis(~./2, name = expression("Temperature " ( degree*C))))+ 
   xlab("")+
+  geom_vline(xintercept = as.POSIXct(as.Date("2020-04-26")),  linetype = "dashed", color = "black")+
   ylab(expression(paste("C", H[4], " flux (", n,"mol ", m^-2, s^-1,")")))+
   geom_hline(yintercept = 0, color = "black", alpha = 0.4)+
   scale_color_manual(values = colors)+
+  theme_bw(base_size = 10)+
   theme(legend.position = "top", legend.title = element_blank())
 
+
+windspring<-ggplot()+
+  geom_path(data = dplyr::filter(spring, DOY < 110), aes(x = datetime, y = wind_speed*20, color = "Wind Speed (m/s)"), group = 1)+
+  geom_path(data = dplyr::filter(spring, DOY> 112), aes(x = datetime, y = wind_speed*20, color = "Wind Speed (m/s)"), group = 1)+
+  geom_point(data = spring, aes(x = datetime, y = ch4_flux *1000, color = "Methane"), size = 1, alpha = 0.2)+
+  scale_y_continuous(sec.axis = sec_axis(~./20, name = "Wind Speed (m/s)"))+ 
+  xlab("")+
+  ylab(expression(paste("C", H[4], " flux (", n,"mol ", m^-2, s^-1,")")))+
+  geom_vline(xintercept = as.POSIXct(as.Date("2020-04-26")),  linetype = "dashed", color = "black")+
+  geom_hline(yintercept = 0, color = "black", alpha = 0.4)+
+  scale_color_manual(values = colors)+
+  theme_bw(base_size = 10)+
+  theme(legend.position = "top", legend.title = element_blank())
+
+
 ggsave("figures/fluxspring.png", width = 8, height = 6, units = 'in', springturn)
+ggsave("figures/windfluxspring.png", width = 8, height = 6, units = 'in', windspring)
+ggsave("figures/windfluxfall.png", width = 8, height = 6, units = 'in', windfall)

@@ -85,13 +85,17 @@ co2<- ggplot()+
   theme_bw()+
   theme(legend.position = "bottom", legend.title = element_blank())
 
-buoy = read_csv('data/Buoy/temp.buoy2020.csv')
-buoy$Date.GMT<- as.Date(buoy$Date.GMT, format = "%m/%d/%y")
+
+ggplot(data = buoy.2020)+
+  geom_line(aes(x = date_time_UTC, y = tempC_93_cm), color = "red")+
+  geom_line(aes(x = date_time_UTC, y = tempC_768_cm), color = "blue")+
+  theme_bw()
+buoy = read_csv('data/Buoy/2020Trout/TB_2019_underice_chla.csv')
+buoy$date_time_UTC<- as.Date(buoy$date_time_UTC, format = "%m/%d/%y")
 buoysurf <- buoy %>%
-  filter(depth == 1)%>%
-  filter(as.Date(Date.GMT) > as.Date('2020-03-15')) %>%
-  filter(as.Date(Date.GMT) < as.Date('2020-10-25'))%>%
-  mutate(date = as.Date(Date.GMT))
+  filter(as.Date(date_time_UTC) > as.Date('2020-03-15')) %>%
+  filter(as.Date(date_time_UTC) < as.Date('2020-10-25'))%>%
+  mutate(date = as.Date(date_time_UTC))
 
 buoybottom<- buoy %>%
   filter(depth == 7)%>%
@@ -104,8 +108,8 @@ theme_set(theme_bw())
 tempgap<- ggplot()+
   geom_path(data = dplyr::filter(fluxTBCH4, DOY < 110), aes(x = date, y = (airtemp), color = "Air Temperature"))+
   geom_path(data = dplyr::filter(fluxTBCH4, DOY > 112), aes(x = date, y = (airtemp), color = "Air Temperature"))+
-  geom_smooth(data = buoysurf, aes(x = date, y = Temp.C, color = "Surface Temperature"))+
-  geom_smooth(data = buoybottom, aes(x = date, y = Temp.C, color = "Bottom Temperature"))+
+  geom_smooth(data = buoysurf, aes(x = date, y = tempC_93_cm, color = "Surface Temperature"))+
+  geom_smooth(data = buoysurf, aes(x = date, y = tempC_768_cm, color = "Bottom Temperature"))+
   ylab("Temperature (C)")+
   xlab("")+
   scale_color_manual(values = colors)+
