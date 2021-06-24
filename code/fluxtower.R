@@ -227,7 +227,7 @@ fluxTBCO2neg<- fluxTBCO2%>%
 
 colors <- c("Air Temperature" = "gray69","1 m Water Temperature" = "navy", "7 m Water Temperature" = "chocolate4")
 theme_set(theme_bw(base_size = 8))
-iceoff<-ggplot()+
+iceoff1<-ggplot()+
   geom_path(data = dplyr::filter(fluxTBCH4, DOY < 110), aes(x = date, y = (airtemp*2), color = "Air Temperature"))+
   geom_path(data = dplyr::filter(fluxTBCH4, DOY > 112 & DOY <140), aes(x = date, y = (airtemp*2), color = "Air Temperature"))+
   geom_path(data = buoysurf, aes(x = as.Date(Date.GMT), y = Temp.C*2, color = "1 m Water Temperature"))+
