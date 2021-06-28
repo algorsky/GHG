@@ -69,7 +69,7 @@ beforefall<-ggplot(beforefall)+
   geom_point(aes(x = o2, y = depth, color = (year4)))+
   scale_colour_viridis_c(name = "Year")+
   scale_y_reverse(name = "Depth (m)") +
-  scale_x_continuous(name = "Oxygen (mg/L)")+
+  scale_x_continuous(name = ((expression(paste(O[2], " (mg " , L^-1,")")))))+
   labs(title = "Ice Covered")+
   theme_bw(base_size = 8)+
   theme(legend.position = "none")
@@ -159,7 +159,8 @@ surfo2<-ggplot(dplyr::filter(oxy, depth == 0))+
   geom_point(aes(x = as.Date(daynum, origin = as.Date('1981-01-01')), y = o2, color = (year4)))+
   scale_colour_viridis_c(name = "Year")+
   scale_x_date(labels = date_format("%b"))+
-  ylab('Surface DO (mg/L)') + xlab('Date') +
+  ylab(expression(paste("Surface " , O[2], " (mg " , L^-1,")")))+
+  xlab('Date') +
   theme_bw(base_size = 8)
 ggsave("figures/Historical/surfaceo2.png", width = 15, height = 10, units = 'in', surfo2)
 
@@ -168,7 +169,7 @@ bottomo2<-ggplot(dplyr::filter(oxy, depth == 7))+
   geom_point(aes(x = as.Date(daynum, origin = as.Date('1981-01-01')), y = o2, color = (year4)))+
   scale_colour_viridis_c(name = "Year")+
   scale_x_date(labels = date_format("%b"))+
-  ylab('Bottom DO (mg/L)') + 
+  ylab(expression(paste("Bottom " , O[2], " (mg " , L^-1,")")))+
   xlab('Date') +
   theme_bw(base_size = 8)
 

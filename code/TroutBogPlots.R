@@ -171,6 +171,12 @@ DO_TB <- tempdo%>%
   select(sampledate, depth, DO)%>%
   filter(!is.na(DO))
 
+DO_TB_depths <- tempdo%>%
+  mutate(sampledate = date)%>%
+  select(sampledate, depth, DO)%>%
+  filter(!is.na(DO))%>%
+  filter(depth != 0)
+
 DOAnnual <- DO_TB %>%
   filter(sampledate <= as.POSIXct('2021-01-01'))
 
@@ -214,7 +220,7 @@ O2<-ggplot(f2TBDO) +
   scale_y_reverse()  +
   scale_color_viridis_c(name = var) +
   ylab('Depth (m)') + xlab('') +
-  labs(fill = ((expression(paste(O[2], " (mg" , L^-1,")")))))+
+  labs(fill = ((expression(paste(O[2], " (mg " , L^-1,")")))))+
   theme_bw(base_size = 8) +
   scale_x_date(breaks = "2 month", minor_breaks = "1 month", labels=date_format("%b, %Y"),
                limits = c(as.Date(paste0(2020,'-01-01')), as.Date(paste0(2020,'-10-31'))))

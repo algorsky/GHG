@@ -1,5 +1,6 @@
 library(tidyverse)
 library(lubridate)
+library(scales)
 
 # Read in data 
 dat = read_csv('data/GC2021/fullheat.csv')

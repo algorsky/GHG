@@ -328,6 +328,7 @@ ggplot(data = buoy.2020)+
 spring<- fluxTBCH4 %>%
   filter(date > '2020-03-15' & date < '2020-05-19')%>%
   mutate(datetime = paste(date, time))
+
 spring$datetime<- as.POSIXct(spring$datetime)
 colors <- c("Air Temperature" = "gray69","1 m Water Temperature" = "navy", "7 m Water Temperature" = "chocolate4", "Wind Speed (m/s)" = 'gray30', "Methane" = "red2")
 theme_set(theme_bw(base_size = 10))
@@ -366,3 +367,15 @@ windspring<-ggplot()+
 ggsave("figures/fluxspring.png", width = 8, height = 6, units = 'in', springturn)
 ggsave("figures/windfluxspring.png", width = 8, height = 6, units = 'in', windspring)
 ggsave("figures/windfluxfall.png", width = 8, height = 6, units = 'in', windfall)
+
+ggplot()+
+  geom_point(data = spring, aes(x = date, y = ch4_flux *1000), size = 0.05, color = "gray", alpha = 0.9)+
+  geom_point(data = dplyr::filter(TBch4mean, month(date) == 3 | month(date) == 4 | month(date) == 5), aes( x = date, y = mean*1000), size = 0.9, color = "red2")+
+  geom_vline(xintercept = as.numeric(as.Date("2020-04-26")),  linetype = "dashed", color = "black")+
+  geom_hline(yintercept = 0, color = "black", alpha = 0.4)+
+  xlab("")+
+  scale_y_continuous(limits = c(-20, 40), breaks = seq(-20, 40, 10))+
+  scale_x_date(date_labels="%b", date_breaks  ="1 month")+
+  ylab(expression(paste("C", H[4], " flux (", n,"mol ", m^-2, s^-1,")")))+
+  theme_bw(base_size = 10)
+ggsave('figures/ASLOiceoff.pdf', width = 5, height = 4, units = 'in', dpi = 500)

@@ -8,15 +8,29 @@ library(scales)
 
 ## Load the data from Github
 # Read in data 
-prac2021 = read_csv('data/GC2021/tidy.all2021.csv')
+prac2020all = read_csv('data/GC2021/tidy.dat.out.all.csv')
+prac2020all$date = as.Date(prac2020all$date, format =  "%m/%d/%y")
 prac2020 = read_csv('data/tidy.dat.out.csv')
 gas<- rbind(prac2021, prac2020)
 gas$date = as.Date(gas$date, format =  "%m/%d/%y")
 gas$doy = yday(gas$date)
 gas$year = format(gas$date, format = "%Y")
 
+gasTB<- prac2020all%>%
+  filter(year(date) == 2020)%>%
+  filter(lake == "TB")%>%
+  mutate(ch4 = dissolvedCH4*1000000)%>%
+  mutate(co2 = dissolvedCO2*1000000)%>%
+  select(date, depth, ch4, co2)
 
-
+TBgasAvg <- gasTB%>%
+  group_by(date, depth) %>% 
+  summarise(CH4 = mean(ch4),
+            CO2 = mean(co2),
+            CH4sd = sd(ch4),
+            CO2sd = sd(co2))
+write.csv(TBgasAvg,"data/gasTBmeansd.csv")
+getwd()
 gd <- gas %>% 
   group_by(lake, date, depth, doy, year) %>% 
   summarise(
