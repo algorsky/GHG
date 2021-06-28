@@ -14,6 +14,7 @@ basePlot <- ggplot(tbGas) +
                                ymin = -Inf, ymax = Inf), fill = 'grey80', alpha = 0.7) +
   scale_x_date(limits = c(as.Date('2020-01-01'), 
                               as.Date('2020-10-31'))) +
+  geom_vline(aes(xintercept = as.Date('2020-04-26')), linetype = 2, size = 0.2) +
   theme_bw(base_size = 8) +
   theme(axis.title.x = element_blank())
 pd <- position_dodge(width = 0.5)
