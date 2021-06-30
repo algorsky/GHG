@@ -29,10 +29,15 @@ TBch4mean<- fluxTBCH4%>%
   filter(mean*1000 > -10)
 
 iceoffch4<- TBch4mean %>%
-  filter(date > as.POSIXct('2020-04-27')& date < as.POSIXct('2020-05-16'))%>%
+  filter(date > as.POSIXct('2020-04-24')& date < as.POSIXct('2020-05-14'))%>%
   mutate(day = mean * 86400)
-sum(iceoffch4$day) * 17 * 0.001
 
+summerch4<- TBch4mean %>%
+  filter(date > as.POSIXct('2020-06-01')& date < as.POSIXct('2020-09-01'))
+
+mean(iceoffch4$mean) * 86400 * 19 * 0.001 #16.945mmol/m2
+
+mean(summerch4$mean) * 86400 * 90 * 0.001 #22.57 mmol/m2
 
 TBco2mean<- fluxTBCO2%>%
   group_by(date)%>%

@@ -114,7 +114,14 @@ p1/p2/p3/p8 + plot_annotation(tag_levels = "A")
 
 ggsave('figures/AG_flux_test_total.pdf', width = 6.5, height = 5, units = 'in', dpi = 500)
 
-# Baseplot for plotting spring 
+# Baseplot for plotting spring
+
+tb = read_csv('data/Data/QAQCFlux.csv') %>% 
+  mutate(datetime = ymd_hms(paste(date,time))) %>% 
+  select(datetime, airtemp, wind_speed, co2_flux, ch4_flux, sonic_temperature) %>% 
+  right_join(dateseq) %>% 
+  left_join(min) %>% 
+  arrange(datetime)
 basePlot <- ggplot(tb) +
   geom_rect(data = tb[1,], aes(xmin =  as.POSIXct(-Inf, origin="1970-01-01"),
                                xmax = as.POSIXct('2020-04-25 12:00:00'), 
@@ -139,7 +146,7 @@ p2 = basePlot +
 
 p3 = basePlot + 
   geom_hline(aes(yintercept = 0), linetype = 2, size = 0.2) +
-  geom_point(aes(x = datetime, y = ch4_flux), fill = 'red4', size = 1, alpha = 0.7, shape = 21, stroke = 0.1)+
+  geom_point(aes(x = datetime, y = ch4_flux*1000), fill = 'red4', size = 1, alpha = 0.7, shape = 21, stroke = 0.1)+
   ylab(expression(paste("C", H[4], " flux (", n,"mol ", m^-2, s^-1,")")))
 
 
@@ -163,7 +170,7 @@ p5 = ggplot(tb) +
 
 p6 = ggplot(tb) +
   geom_hline(aes(yintercept = 0), linetype = 2, size = 0.2) +
-  geom_point(aes(x = datetime, y = ch4_flux), fill = 'red4', size = 1, alpha = 0.7, shape = 21, stroke = 0.1) +
+  geom_point(aes(x = datetime, y = ch4_flux*1000), fill = 'red4', size = 1, alpha = 0.7, shape = 21, stroke = 0.1) +
   theme_bw(base_size = 8) +
   scale_x_datetime(limits = c(as.POSIXct('2020-09-28 12:00:00'), as.POSIXct('2020-10-28 12:00:00'))) +
   ylab(expression(paste("C", H[4], " flux (", n,"mol ", m^-2, s^-1,")")))+
