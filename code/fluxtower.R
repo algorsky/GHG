@@ -121,7 +121,7 @@ ggplot(hourwholeCH4)+
 ggplot(hourwholeCO2)+
   geom_point(aes(x = Hour, y = mean))+
   geom_errorbar(aes(x = Hour, y = mean, ymin = (mean - se), ymax = (mean + se)), width = .2)+
-  scale_y_continuous(limits = c(-0.1,7),breaks = seq(0,7,1))+
+  scale_y_continuous(limits = c(-0.1,0.5),breaks = seq(0,7,1))+
   scale_x_continuous(limits = c(7,18),breaks = seq(8,18,2))+
   ylab(expression(paste("C", O[2], " flux (", µ,"mol ", m^-2, s^-1,")")))+
   theme_bw(base_size = 8)+

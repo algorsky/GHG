@@ -37,29 +37,31 @@ doHour.2019 = doHour.2019 %>%
 
 doHour.2021 = doHour.2021 %>%
   filter(as.Date(CT.Date) > as.Date('2020-12-10')) %>%
-  filter(as.Date(CT.Date) < as.Date('2021-05-01')) %>%
+  filter(as.Date(CT.Date) < as.Date('2021-04-07')) %>%
   mutate(doy = yday(as.Date(CT.Date)))
 
 doHour.2020 = doHour.2020 %>% 
   filter(as.Date(CT.Date) != as.Date('2020-03-02')) %>%
   filter(as.Date(CT.Date) > as.Date('2019-11-15')) %>%
-  filter(as.Date(CT.Date) < as.Date('2020-06-01'))%>%
+  filter(as.Date(CT.Date) < as.Date('2020-05-15'))%>%
   mutate(doy = yday(as.Date(CT.Date)))
 
 doHour<- rbind(doHour.2019, doHour.2020, doHour.2021)%>%
   mutate(year = year(as.Date(CT.Date)))%>%
-  filter(doy > 0 & doy < 160)
-
-surfaceDO<-doHour %>%
-  ggplot() +
-  geom_line(aes(x = as.Date(doy, origin = as.Date('2019-01-01')), y = DO.mgL, color = factor(year))) +
-  scale_x_date(labels = date_format("%b"), breaks = "1 month")+
-  scale_color_manual(name = 'Year', values = c('gray','lightblue4','gold')) +
-  theme_bw(base_size = 8) +
-  labs(title = 'Sparkling Bog 2019-2021') + ylab('Surface DO (mg/L)') + xlab('Date')+
-  geom_vline(xintercept = as.numeric(as.Date("2019-04-13")),  linetype = "dashed", color = "gray")+
-  geom_vline(xintercept = as.numeric(as.Date("2019-04-06")),  linetype = "dashed", color = "gold")+
-  geom_vline(xintercept = as.numeric(as.Date("2019-04-26")),  linetype = "dashed", color = "lightblue4")
+  filter(doy > 0 & doy < 160)%>%
+  mutate(date = `year<-`(CT.Date, 2014))
+  
+surfaceDO<-ggplot(doHour) +
+  geom_line(aes(x = date, y = DO.mgL, group = year(CT.Date), color = factor(year(CT.Date)))) +
+  scale_x_datetime(labels = date_format("%b-%d"))+
+  ylab(expression(paste(O[2], " (mg " , L^-1,")")))+
+  geom_vline(xintercept = as.POSIXct("2014-04-13 00:15:00"),  linetype = "dashed", color = "gray")+
+  geom_vline(xintercept = as.POSIXct("2014-04-26 00:15:00"),  linetype = "dashed", color = "lightblue4")+
+  geom_vline(xintercept = as.POSIXct("2014-04-06 00:15:00"),  linetype = "dashed", color = "gold")+
+  scale_color_manual(breaks = c("2019", "2020", "2021"),values = c("gray", "lightblue4", "gold"))+
+  xlab("Date")+
+  theme_bw()+
+  theme(legend.title = element_blank())
 ggsave("figures/surfacebuoyDO.png", width = 8, height = 6, units = 'in', surfaceDO)
 
 p.do1 = ggplot(doHour.2020) +

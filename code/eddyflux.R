@@ -7,6 +7,10 @@ library(patchwork)
 dataSSB = read_csv('data/FluxTower/eddypro_SSB_full_output.csv')
 dataTB = read_csv('data/FluxTower/eddypro_TB_full_output_new.csv')
 
+tbAF = read_csv('data/FluxTower/US-TrB_Ameriflux.csv')
+tbAF<- tbAF%>%
+  mutate(datetime = as.POSIXct(x = as.character(TIMESTAMP_END),format = "%Y%m%d%H%M"))
+
 #QC CH4 for SSB
 #qcSSBCH4<- dataSSB%>%
  #filter(ch4_flux > -9999)
@@ -58,6 +62,20 @@ TBco2mean<- fluxTBCO2%>%
   group_by(date)%>%
   summarise(mean = mean(co2_flux))%>%
   filter(mean > -2.5)
+
+twopm<- fluxTBCO2%>%
+  filter(co2_flux > -6)%>%
+  filter(hour(time) == 14)
+
+t.test(twopm$co2_flux)
+
+mean(twopm$co2_flux)
+
+two<-ggplot()+
+  geom_point(data = twopm, aes(x= date, y = co2_flux))+
+  ylab(expression(paste("C", O[2], " flux (", µ,"mol ", m^-2, s^-1,")")))+
+  theme_bw()
+ggsave("figures/twopm.png", width = 8, height = 6, units = 'in', two)
 
 
 #CH4 Flux (µmol m-2 s-1)

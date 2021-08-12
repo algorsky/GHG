@@ -1,6 +1,7 @@
 library(tidyverse)
 library(lubridate)
 library(patchwork)
+library(scales)
 
 ################## Temp/Light Sensor ##################
 # 2019
@@ -36,7 +37,8 @@ light.2021 = light.2021 %>%
   filter(as.Date(Date.GMT) > as.Date('2020-12-10')) %>%
   filter(as.Date(Date.GMT) < as.Date('2021-04-12')) %>%
   arrange(Date.GMT, depth)%>%
-  mutate(metric = Intensity.lum.ft2 * 10.7639104)
+  mutate(metric = Intensity.lum.ft2 * 10.7639104)%>%
+  mutate(Temp.F = Temp.C*1.8 + 32)
 
 # 2020
 light.list1 = list()
@@ -84,7 +86,22 @@ light <- rbind(lighttemp19, lighttemp20, lighttemp21)%>%
   mutate(year = year(as.Date(Date.GMT)))%>%
   filter(doy > 0 & doy < 130) %>%
   filter(depth == 1)%>%
-  mutate(metric = Intensity.lum.ft2 * 10.7639104)
+  mutate(metric = Intensity.lum.ft2 * 10.7639104)%>%
+  mutate(date = `year<-`(Date.GMT, 2014))
+
+ggplot(light)+
+  geom_line(aes(x = date, y =  metric, group = year(Date.GMT), color = factor(year(Date.GMT)))) +
+  scale_x_datetime(labels = date_format("%b-%d"))+
+  ylab(expression("Surface Temperature " (degree *C)))+
+  geom_vline(xintercept = as.POSIXct("2014-04-13 00:15:00"),  linetype = "dashed", color = "gray")+
+  geom_vline(xintercept = as.POSIXct("2014-04-26 00:15:00"),  linetype = "dashed", color = "lightblue4")+
+  geom_vline(xintercept = as.POSIXct("2014-04-06 00:15:00"),  linetype = "dashed", color = "gold")+
+  scale_color_manual(breaks = c("2019", "2020", "2021"),values = c("gray", "lightblue4", "gold"))+
+  xlab("Date")+
+  theme_bw()+
+  theme(legend.title = element_blank())
+
+ggsave('figures/surfacewatertemp.png',width = 7, height = 5)
 
 library(scales)
 surfacetemp<-light %>%
@@ -128,33 +145,38 @@ write.csv(summer, "data/summertempSSBbuoy.csv", row.names = FALSE)
 
 #Plotting Temperature
 p.t1 = ggplot(light.2020) +
-  geom_line(aes(x = as.Date(Date.GMT), y = Temp.C, color = depth, group = depth)) +
+  geom_line(aes(x = Date.GMT, y = Temp.C, color = depth, group = depth)) +
   scale_colour_viridis_c(name = "Depth (m)") +
-  scale_x_date(labels = date_format("%b"), breaks = "1 month", limits = as.Date(c('2019-12-01','2020-05-01')))+
+  scale_x_datetime(labels = date_format("%b-%d"), breaks = "1 month", limits = as.POSIXct(c('2019-12-01 00:00:05','2020-05-01 00:00:05')))+
   theme_bw(base_size = 8) +
-  geom_vline(xintercept = as.numeric(as.Date("2020-04-26")),  linetype = "dashed", color = "black")+
+  geom_vline(xintercept = as.POSIXct(("2020-04-26 00:00:05")),  linetype = "dashed", color = "black")+
   # facet_wrap(vars(depth)) +
-  labs(title = 'South Sparkling Bog 2020') + ylab('Temp (degC)') + xlab('Date') +
+  labs(title = 'South Sparkling Bog 2020') + 
+  ylab(expression("Temperature " ( degree*C)))+ 
+  xlab('Date') +
   NULL
 
 p.t2 = ggplot(light.2021) +
-  geom_line(aes(x = as.Date(Date.GMT), y = Temp.C, color = depth, group = depth)) +
+  geom_line(aes(x = Date.GMT, y = Temp.C, color = depth, group = depth)) +
   scale_colour_viridis_c(name = "Depth (m)") +
-  scale_x_date(labels = date_format("%b"), breaks = "1 month", limits = as.Date(c('2020-12-01','2021-05-01')))+
+  scale_x_datetime(labels = date_format("%b-%d"), breaks = "1 month", limits = as.POSIXct(c('2020-12-01 00:00:05','2021-05-01 00:00:05')))+
+  ylab(expression("Temperature " ( degree*C)))+
   theme_bw(base_size = 8) +
-  geom_vline(xintercept = as.numeric(as.Date("2021-04-06")),  linetype = "dashed", color = "black")+
+  geom_vline(xintercept = as.POSIXct(("2021-04-06 00:00:05")),  linetype = "dashed", color = "black")+
   # facet_wrap(vars(depth)) +
-  labs(title = 'South Sparkling Bog 2021') + ylab('Temp (degC)') + xlab('Date') +
+  labs(title = 'South Sparkling Bog 2021') + xlab('Date') +
   NULL
 
 p.t3 = ggplot(light.2019) +
-  geom_line(aes(x = as.Date(Date.GMT), y = Temp.C, color = depth, group = depth)) +
+  geom_line(aes(x = Date.GMT, y = Temp.C, color = depth, group = depth)) +
   scale_colour_viridis_c(name = "Depth (m)") +
-  scale_x_date(labels = date_format("%b"), breaks = "1 month", limits = as.Date(c('2018-12-01','2019-05-01')))+
+  scale_x_datetime(labels = date_format("%b-%d"), breaks = "1 month", limits = as.POSIXct(c('2018-12-01 00:00:05','2019-05-01 00:00:05')))+
   theme_bw(base_size = 8) +
-  geom_vline(xintercept = as.numeric(as.Date("2019-04-13")),  linetype = "dashed", color = "black")+
+  geom_vline(xintercept = as.POSIXct(("2019-04-13 00:00:05")),  linetype = "dashed", color = "black")+
   # facet_wrap(vars(depth)) +
-  labs(title = 'South Sparkling Bog 2019') + ylab('Temp (degC)') + xlab('Date') +
+  labs(title = 'South Sparkling Bog 2019') + 
+  ylab(expression("Temperature " ( degree*C)))+ 
+  xlab('Date') +
   NULL
 
 #Combo Plot
@@ -167,6 +189,7 @@ ggplot(filter(light.2021, depth == 1)) + geom_line(aes(x = Date.GMT, y = Temp.C,
   geom_line(data = filter(light.2020, depth == 1), aes(x = Date.GMT, y = Temp.C, color = '2020')) +
   geom_line(data = filter(light.2019, depth == 1), aes(x = Date.GMT, y = Temp.C, color = '2019')) +
   theme_bw() +
+  scale_x_datetime(labels = date_format("%b-%d"))+
   scale_color_manual(name = 'Year',values = c('gray','lightblue4','gold')) +
   labs(title = 'Sparkling Bog Surface Temperature') + ylab('Temp (degC)') + xlab('Date') +
   ylim(c(0,10))
@@ -182,7 +205,7 @@ p.l1 = ggplot(dplyr::filter(light.2020, depth != 1)) +
   geom_vline(xintercept = as.numeric(as.Date("2020-04-26")),  linetype = "dashed", color = "black")+
   # facet_wrap(vars(depth)) +
   ylim(0, 1500)+
-  ylab(expression(paste("Light (lum/", m^2,")")))+
+  ylab(expression(paste("Light (lum ", m^-2,")")))+
   labs(title = 'South Sparkling Bog 2020') + 
   xlab('Date') +
   NULL
@@ -194,7 +217,7 @@ p.l2 = ggplot(dplyr::filter(light.2021, depth != 1)) +
   theme_bw(base_size = 8) +
   geom_vline(xintercept = as.numeric(as.Date("2021-04-06")),  linetype = "dashed", color = "black")+
   ylim(0, 1500)+
-  ylab(expression(paste("Light (lum/", m^2,")")))+
+  ylab(expression(paste("Light (lum ", m^-2,")")))+
   labs(title = 'South Sparkling Bog 2021') + 
   xlab('Date') +
   NULL
@@ -206,7 +229,7 @@ p.l3 = ggplot(dplyr::filter(light.2019, depth != 1)) +
   scale_x_date(labels = date_format("%b"), breaks = "1 month", limits = as.Date(c('2018-12-01','2019-05-01')))+
   geom_vline(xintercept = as.numeric(as.Date("2019-04-13")),  linetype = "dashed", color = "black")+
   ylim(0,1500)+
-  ylab(expression(paste("Light (lum/", m^2,")")))+
+  ylab(expression(paste("Light (lum ", m^-2,")")))+
   labs(title = 'South Sparkling Bog 2019') + 
   xlab('Date') +
   NULL
@@ -232,7 +255,7 @@ ggplot(filter(light.2020, depth == 1)) +
   geom_line(data = filter(light.2019, depth == 1), aes(x = as.Date(Date.GMT), y = metric, color = '2019'), alpha = 0.7) +
   theme_bw() +
   scale_color_manual(name = 'Year',values = c('gray','lightblue4','gold')) +
-  ylab(expression(paste("Surface Light Intensity (lum/", m^2,")")))+
+  ylab(expression(paste("Surface Light Intensity (lum ", m^-2,")")))+
  xlab('Date')+
   geom_vline(xintercept = as.numeric(as.Date("2019-04-13")),  linetype = "dashed", color = "gray")+
   geom_vline(xintercept = as.numeric(as.Date("2021-04-06")),  linetype = "dashed", color = "gold")+
