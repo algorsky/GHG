@@ -42,6 +42,7 @@ fall<- storageTB %>%
   mutate(co2SA = (co2mass * 61693.5)/10983)
 
 ch4vol_fall = 481.3385 - 264.8943
+
 co2vol_fall = 3067.311 - 2400.751
 
 

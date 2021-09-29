@@ -6,9 +6,10 @@ loadLTERtemp <- function() {
   # Package ID: knb-lter-ntl.29.27 Cataloging System:https://pasta.edirepository.org.
   # Data set title: North Temperate Lakes LTER:
   # Physical Limnology of Primary Study Lakes 1981 - current
-  inUrl3  <- "https://pasta.lternet.edu/package/data/eml/knb-lter-ntl/29/27/03e232a1b362900e0f059859abe8eb97"
+  inUrl3  <- "https://pasta.lternet.edu/package/data/eml/knb-lter-ntl/17/32/fa72ddcbd255790b68cf31a5a629fdf7" 
   infile3 <- tempfile()
   download.file(inUrl3,infile3,method="curl")
+
   
   LTERtemp <-read_csv(infile3, skip=1, quote ='"',guess_max = 100000, col_names=c(
     "lakeid" ,"year4" ,"daynum" ,"sampledate" ,"depth" ,"rep" ,"sta" ,"event" ,"wtemp" ,"o2" ,"o2sat" ,"deck" ,

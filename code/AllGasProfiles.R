@@ -253,13 +253,25 @@ tempdo2020 <- tempdo %>%
 #Facet_Wrap by Date for Temperature and DO for Trout Bog
 lab_dates <- pretty(tempdo2020$sampledate)
 as.Date(lab_dates, format =  "%m/%d/%y")
-ggplot(tempdo2020)+
+library(grid)
+tempseason<-ggplot(tempdo2020)+
   geom_point(aes(x = waterTemp_C, y = water_depth_m, color = sampledate), size = 2)+
   geom_path(aes(x = waterTemp_C, y = water_depth_m, group = sampledate, color = sampledate))+
   scale_colour_viridis_c(trans = "date", name = "")+
   scale_y_reverse(name = "Depth (m)") +
   scale_x_continuous(expression("Temperature " ( degree*C)))+
-  facet_wrap(~icecovered, scales = "free")
+  facet_wrap(~icecovered, scales = "free")+
+  theme_bw()
+
+
+ggplot(dplyr::filter(tempdowinter, lake == 'SSB')) + 
+ggplot(dplyr:: filter(tempdo2020, water_depth_m >4 & icecovered == "Open Water"))+
+  geom_point(aes(x = waterTemp_C, y = water_depth_m, color = sampledate), size = 2)+
+  geom_path(aes(x = waterTemp_C, y = water_depth_m, group = sampledate, color = sampledate))+
+  scale_colour_viridis_c(trans = "date", name = "")+
+  scale_y_reverse(name = "Depth (m)") +
+  scale_x_continuous(expression("Temperature " ( degree*C)))+
+  theme_bw()
 ggsave("figures/tempcompareTB.png", width = 8, height = 6, units = 'in')
 
 TempWinter<-ggplot(dplyr::filter(tempdo2020, icecovered == "yes")) + 

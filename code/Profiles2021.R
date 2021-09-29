@@ -73,7 +73,7 @@ CH4<-ggplot(dplyr::filter(gd, lake == 'TB'| lake == 'SSB')) +
 
 # Read in data 
 tempdo = read_csv('data/ChemTempDO/tempdo.csv')
-tempdo$date = as.Date(tempdo$Date, format =  "%m/%d/%y")
+tempdo$date = as.Date(tempdo$sampledate, format =  "%m/%d/%y")
 tempdo<- tempdo%>%
   mutate(icecovered = ifelse(month(date)%in% 1:4,"yes",
                              "no"))
