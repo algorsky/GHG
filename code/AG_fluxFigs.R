@@ -144,9 +144,10 @@ ggsave('figures/AG_flux_test_total.pdf', width = 6.5, height = 5, units = 'in', 
 
 tb = read_csv('data/Data/QAQCFlux.csv') %>% 
   mutate(datetime = ymd_hms(paste(date,time))) %>% 
-  select(datetime, airtemp, wind_speed, co2_flux, ch4_flux, sonic_temperature) %>% 
+  select(datetime, airtemp, wind_speed, co2_flux, ch4_flux, sonic_temperature, air_pressure) %>% 
   right_join(dateseq) %>% 
-  left_join(min) %>% 
+  left_join(min) %>%
+  left_join(pressure)%>%
   arrange(datetime)
 
 pulseTB<- tb%>%
@@ -168,6 +169,12 @@ p1 = basePlot +
   geom_line(data = tb2.hour, aes(x = date_time_UTC, y = temp_minidot_c), size = 0.2, col = 'blue1') +
   scale_y_continuous(limits = c(-20, 23), expand = c(0,0))+
   ylab(expression("Temperature " ( degree*C)))
+
+p10<-basePlot + 
+  geom_ribbon(data = pressure, aes(x = datetime, ymax = Max.Pressure, ymin = Min.Pressure), fill = 'goldenrod', alpha = 0.8) +
+  geom_line(aes(x = datetime, y = air_pressure/3386), size = 0.2) +
+  scale_y_continuous(limits = c(27.5, 29), expand = c(0,0))+
+  ylab(expression("Pressure (Hg)" ))
 
 p2 = basePlot + 
   geom_col(aes(x = datetime, y = wind_speed), col = 'lightblue4', size = 0.1)+
@@ -191,6 +198,15 @@ p4 = ggplot(tb) +
   ylab(expression("Temperature " ( degree*C)))+
   theme(axis.title.x = element_blank())
 
+p11 = ggplot(tb) +
+  geom_ribbon(data = pressure, aes(x = datetime, ymax = Max.Pressure, ymin = Min.Pressure), fill = 'goldenrod', alpha = 0.8) +
+  geom_line(aes(x = datetime, y = air_pressure/3386), size = 0.2) +
+  scale_y_continuous(limits = c(27.5, 29), expand = c(0,0))+
+  ylab(expression("Pressure (Hg)" ))+
+  theme_bw(base_size = 8) +
+  scale_x_datetime(limits = c(as.POSIXct('2020-09-28 12:00:00'), as.POSIXct('2020-10-28 12:00:00'))) +
+  theme(axis.title.x = element_blank())
+
 p5 = ggplot(tb) +
   geom_col(aes(x = datetime, y = wind_speed), col = 'lightblue4', size = 0.1) +
   theme_bw(base_size = 8) +
@@ -210,7 +226,8 @@ layout <- "
 AB
 CD
 EF
+GH
 "
 
-p1 + p4 + p2 + p5 + p3 + p6 + plot_layout(design = layout) + plot_annotation(tag_levels = "A")
+p1 + p4 + p10 + p11 + p2 + p5 + p3 + p6 + plot_layout(design = layout) + plot_annotation(tag_levels = "A")
 ggsave('figures/AG_flux_test.pdf', width = 6.5, height = 4, units = 'in', dpi = 500)
