@@ -72,12 +72,12 @@ TBch4mean<- tbch4%>%
 
 
 # Baseplot for plotting whole year 
-basePlot<-ggplot(tbch4) +
+basePlot <- ggplot(tb) +
   geom_rect(data = tb[1,], aes(xmin =  as.POSIXct(-Inf, origin="1970-01-01"),
                                xmax = as.POSIXct('2020-04-25 12:00:00'), 
                                ymin = -Inf, ymax = Inf), fill = 'grey80', alpha = 0.7) +
   scale_x_datetime(limits = c(as.POSIXct('2020-03-16 12:00:00'), 
-                              as.POSIXct('2020-10-28 12:00:00')), breaks = breaks_width("month"), date_labels = "%b") +
+                              as.POSIXct('2020-10-28 12:00:00'))) +
   geom_vline(aes(xintercept = as.POSIXct('2020-04-25 12:00:00')), linetype = 2, size = 0.2) +
   theme_bw(base_size = 8) +
   theme(axis.title.x = element_blank())
@@ -109,13 +109,7 @@ p1 = basePlot +
   scale_y_continuous(limits = c(-20, 33), expand = c(0,0))+
   ylab(expression("Temperature " ( degree*C)))
 
-p1 = basePlot + 
-  geom_ribbon(data = min, aes(x = datetime, ymax = TMAX, ymin = TMIN), fill = 'lightblue3', alpha = 0.8) +
-  geom_line(aes(x = datetime, y = sonic_temperature-273.15), size = 0.2) +
-  geom_line(data = tb1.hour, aes(x = date_time_UTC, y = tempC_93_cm), size = 0.2, col = 'lightblue4') + #
-  geom_line(data = tb2.hour, aes(x = date_time_UTC, y = temp_minidot_c), size = 0.2, col = 'lightblue4') +
-  scale_y_continuous(limits = c(-20, 33), expand = c(0,0))+
-  ylab(expression("Temperature " ( degree*C)))
+
 
 p10<-basePlot + 
   geom_ribbon(data = pressure, aes(x = datetime, ymax = Max.Pressure, ymin = Min.Pressure), fill = 'goldenrod', alpha = 0.8) +
