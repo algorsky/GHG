@@ -109,6 +109,14 @@ p1 = basePlot +
   scale_y_continuous(limits = c(-20, 33), expand = c(0,0))+
   ylab(expression("Temperature " ( degree*C)))
 
+p1 = basePlot + 
+  geom_ribbon(data = min, aes(x = datetime, ymax = TMAX, ymin = TMIN), fill = 'lightblue3', alpha = 0.8) +
+  geom_line(aes(x = datetime, y = sonic_temperature-273.15), size = 0.2) +
+  geom_line(data = tb1.hour, aes(x = date_time_UTC, y = tempC_93_cm), size = 0.2, col = 'lightblue4') + #
+  geom_line(data = tb2.hour, aes(x = date_time_UTC, y = temp_minidot_c), size = 0.2, col = 'lightblue4') +
+  scale_y_continuous(limits = c(-20, 33), expand = c(0,0))+
+  ylab(expression("Temperature " ( degree*C)))
+
 p10<-basePlot + 
   geom_ribbon(data = pressure, aes(x = datetime, ymax = Max.Pressure, ymin = Min.Pressure), fill = 'goldenrod', alpha = 0.8) +
   geom_line(aes(x = datetime, y = air_pressure/3386), size = 0.2) +
@@ -160,7 +168,7 @@ basePlot <- ggplot(tb) +
   scale_x_datetime(limits = c(as.POSIXct('2020-03-16 12:00:00'), 
                               as.POSIXct('2020-05-20 12:00:00'))) +
   theme_bw(base_size = 8) +
-  theme(axis.title.x = element_blank())
+  theme(axis.title.x = element_blank(), axis.title.y = element_text(hjust = 0.5))
 
 p1 = basePlot + 
   geom_ribbon(data = min, aes(x = datetime, ymax = TMAX, ymin = TMIN), fill = 'lightblue3', alpha = 0.8) +
@@ -168,23 +176,23 @@ p1 = basePlot +
   geom_line(data = tb1.hour, aes(x = date_time_UTC, y = tempC_93_cm), size = 0.2, col = 'blue1') + #
   geom_line(data = tb2.hour, aes(x = date_time_UTC, y = temp_minidot_c), size = 0.2, col = 'blue1') +
   scale_y_continuous(limits = c(-20, 23), expand = c(0,0))+
-  ylab(expression("Temperature " ( degree*C)))
+  ylab(expression("Temperature\n"( degree*C)))
 
 p10<-basePlot + 
   geom_ribbon(data = pressure, aes(x = datetime, ymax = Max.Pressure, ymin = Min.Pressure), fill = 'goldenrod', alpha = 0.8) +
   geom_line(aes(x = datetime, y = air_pressure/3386), size = 0.2) +
   scale_y_continuous(limits = c(27.5, 29), expand = c(0,0))+
-  ylab(expression("Pressure (Hg)" ))
+  ylab(expression("Pressure \n (Hg)" ))
 
 p2 = basePlot + 
   geom_col(aes(x = datetime, y = wind_speed), col = 'lightblue4', size = 0.1)+
-  ylab(expression(paste("Wind speed (m",s^-1,")")))
+  ylab(expression(paste("Wind speed \n (m",s^-1,")")))
 
 p3 = basePlot + 
   geom_hline(aes(yintercept = 0), linetype = 2, size = 0.2) +
   geom_point(aes(x = datetime, y = ch4_flux*1000), fill = 'red4', size = 1, alpha = 0.7, shape = 21, stroke = 0.1)+
   geom_point(data = pulseTB, aes(x = datetime, y = ch4_flux *1000), fill = "gold", size = 1, alpha = 0.7, shape = 21, stroke = 0.1)+
-  ylab(expression(paste("C", H[4], " flux (", n,"mol ", m^-2, s^-1,")")))
+  ylab(expression(paste("C", H[4], " flux \n (", n,"mol ", m^-2, s^-1,")")))
 
 
 p4 = ggplot(tb) +
@@ -195,14 +203,14 @@ p4 = ggplot(tb) +
   theme_bw(base_size = 8) +
   scale_x_datetime(limits = c(as.POSIXct('2020-09-28 12:00:00'), as.POSIXct('2020-10-28 12:00:00'))) +
   scale_y_continuous(limits = c(-20, 23), expand = c(0,0)) +
-  ylab(expression("Temperature " ( degree*C)))+
+  ylab(expression("Temperature \n" ( degree*C)))+
   theme(axis.title.x = element_blank())
 
 p11 = ggplot(tb) +
   geom_ribbon(data = pressure, aes(x = datetime, ymax = Max.Pressure, ymin = Min.Pressure), fill = 'goldenrod', alpha = 0.8) +
   geom_line(aes(x = datetime, y = air_pressure/3386), size = 0.2) +
   scale_y_continuous(limits = c(27.5, 29), expand = c(0,0))+
-  ylab(expression("Pressure (Hg)" ))+
+  ylab(expression("Pressure \n (Hg)" ))+
   theme_bw(base_size = 8) +
   scale_x_datetime(limits = c(as.POSIXct('2020-09-28 12:00:00'), as.POSIXct('2020-10-28 12:00:00'))) +
   theme(axis.title.x = element_blank())
@@ -211,7 +219,7 @@ p5 = ggplot(tb) +
   geom_col(aes(x = datetime, y = wind_speed), col = 'lightblue4', size = 0.1) +
   theme_bw(base_size = 8) +
   scale_x_datetime(limits = c(as.POSIXct('2020-09-28 12:00:00'), as.POSIXct('2020-10-28 12:00:00'))) +
-  ylab(expression(paste("Wind speed (m",s^-1,")")))+
+  ylab(expression(paste("Wind speed \n (m",s^-1,")")))+
   theme(axis.title.x = element_blank())
 
 p6 = ggplot(tb) +
@@ -219,7 +227,7 @@ p6 = ggplot(tb) +
   geom_point(aes(x = datetime, y = ch4_flux*1000), fill = 'red4', size = 1, alpha = 0.7, shape = 21, stroke = 0.1) +
   theme_bw(base_size = 8) +
   scale_x_datetime(limits = c(as.POSIXct('2020-09-28 12:00:00'), as.POSIXct('2020-10-28 12:00:00'))) +
-  ylab(expression(paste("C", H[4], " flux (", n,"mol ", m^-2, s^-1,")")))+
+  ylab(expression(paste("C", H[4], " flux \n (", n,"mol ", m^-2, s^-1,")")))+
   theme(axis.title.x = element_blank())
 
 layout <- "
