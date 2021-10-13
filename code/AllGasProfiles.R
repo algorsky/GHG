@@ -263,14 +263,15 @@ tempseason<-ggplot(tempdo2020)+
   facet_wrap(~icecovered, scales = "free")+
   theme_bw()
 
-sixm<- ggplot(dplyr::filter(tempdo2020, water_depth_m > 4)) + 
-  geom_point(aes(x = waterTemp_C, y = water_depth_m, color = sampledate), size = 2)+
-  geom_path(aes(x = waterTemp_C, y = water_depth_m, group = sampledate, color = sampledate))+
-  scale_colour_viridis_c(trans = "date", name = "")+
-  scale_y_reverse(name = "Depth (m)") +
-  facet_wrap(~icecovered, scales = "free")+
-  scale_x_continuous(expression("Temperature " ( degree*C)), limits = c(3.75, 5))+
-  theme_bw()
+sixm<- ggplot(dplyr::filter(tempdo2020, water_depth_m == 6)) +
+  geom_point(aes( y = waterTemp_C, x = sampledate))+
+  scale_y_reverse(name = expression("Temperature " ( degree*C))) +
+  theme_bw(base_size = 10)+
+  xlab("")+
+  scale_x_date(breaks = breaks_width("month"), date_labels = "%b") +
+  annotate("rect", xmin = as.Date(paste0(2020,'-01-01')), xmax = as.Date(paste0(2020,'-04-26')), ymin = 5, ymax = 3, alpha = 0.1)+
+  theme(legend.title = element_blank())
+ 
 tempseason / sixm + plot_annotation(tag_levels = "A")
 ggsave("figures/tempcompareTB.png", width = 8, height = 6, units = 'in')
 
