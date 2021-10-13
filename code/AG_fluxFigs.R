@@ -13,7 +13,7 @@ dateseq = data.frame(datetime = seq.POSIXt(from = as.POSIXct('2020-03-23 12:00:0
                                                      to = as.POSIXct('2020-10-28 12:00:00'),
                                           by = '1 hour'))
 # Load flux data and merge with timeseries dataframe
-dataTB= read_csv('data/FluxTower/eddypro_TB_full_output_new.csv') %>%
+tb= read_csv('data/FluxTower/eddypro_TB_full_output_new.csv') %>%
   mutate(date = as.Date(date, format = "%m/%d/%y"))%>%
   mutate(datetime = ymd_hms(paste(date,time))) %>% 
   select(datetime, wind_speed, co2_flux, ch4_flux, qc_ch4_flux, qc_co2_flux, sonic_temperature, date, air_pressure) %>% 
@@ -23,26 +23,20 @@ dataTB= read_csv('data/FluxTower/eddypro_TB_full_output_new.csv') %>%
   arrange(datetime)
 names(tb)
 
-tbch4<- dataTB%>%
+tbch4<- tb%>%
   filter(ch4_flux > -9999)%>%
   filter(qc_ch4_flux <= 1)%>%
   filter(ch4_flux > -0.05 & ch4_flux < 0.05)
 
 unique(ymd(tbch4$date))
 
-tbco2<- dataTB%>%
+tbco2<- tb%>%
   filter(co2_flux > -9999)%>%
   filter(qc_co2_flux <= 1)%>%
   filter(co2_flux > -10 & co2_flux < 10)
+tbwind<- tb%>%
+  filter(wind_speed > -9999)
 
-
-
-tb2 = read_csv('data/Data/QAQCFlux.csv') %>% 
-  mutate(datetime = ymd_hms(paste(date,time))) %>% 
-  select(datetime, airtemp, wind_speed, co2_flux, ch4_flux, sonic_temperature) %>% 
-  right_join(dateseq) %>% 
-  left_join(min) %>% 
-  arrange(datetime)
 
 # Load buoy data
 tb1.hour = read_csv('data/Data/TB_2019_underice_chla.csv') %>% 
@@ -77,7 +71,7 @@ basePlot <- ggplot(tb) +
                                xmax = as.POSIXct('2020-04-25 12:00:00'), 
                                ymin = -Inf, ymax = Inf), fill = 'grey80', alpha = 0.7) +
   scale_x_datetime(limits = c(as.POSIXct('2020-03-16 12:00:00'), 
-                              as.POSIXct('2020-10-28 12:00:00'))) +
+                              as.POSIXct('2020-10-28 12:00:00')), breaks = breaks_width("month"), date_labels = "%b") +
   geom_vline(aes(xintercept = as.POSIXct('2020-04-25 12:00:00')), linetype = 2, size = 0.2) +
   theme_bw(base_size = 8) +
   theme(axis.title.x = element_blank())
@@ -101,6 +95,16 @@ basePlotCO2 <- ggplot(tbco2) +
   theme_bw(base_size = 8) +
   theme(axis.title.x = element_blank())
 
+basePlotwind <- ggplot(tbwind) +
+  geom_rect(data = tb[1,], aes(xmin =  as.POSIXct(-Inf, origin="1970-01-01"),
+                               xmax = as.POSIXct('2020-04-25 12:00:00'), 
+                               ymin = -Inf, ymax = Inf), fill = 'grey80', alpha = 0.7) +
+  scale_x_datetime(limits = c(as.POSIXct('2020-03-16 12:00:00'), 
+                              as.POSIXct('2020-10-28 12:00:00')), breaks = breaks_width("month"), date_labels = "%b") +
+  geom_vline(aes(xintercept = as.POSIXct('2020-04-25 12:00:00')), linetype = 2, size = 0.2) +
+  theme_bw(base_size = 8) +
+  theme(axis.title.x = element_blank())
+
 p1 = basePlot + 
   geom_ribbon(data = min, aes(x = datetime, ymax = TMAX, ymin = TMIN), fill = 'lightblue3', alpha = 0.8) +
   geom_line(aes(x = datetime, y = sonic_temperature-273.15), size = 0.2) +
@@ -112,30 +116,30 @@ p1 = basePlot +
 
 
 p10<-basePlot + 
-  geom_ribbon(data = pressure, aes(x = datetime, ymax = Max.Pressure, ymin = Min.Pressure), fill = 'goldenrod', alpha = 0.8) +
-  geom_line(aes(x = datetime, y = air_pressure/3386), size = 0.2) +
-  scale_y_continuous(limits = c(27.5, 29), expand = c(0,0))+
-  ylab(expression("Pressure (Hg)" ))
+  geom_ribbon(data = pressure, aes(x = datetime, ymax = Max.Pressure*3.386, ymin = Min.Pressure*3.386), fill = 'goldenrod', alpha = 0.8) +
+  geom_line(aes(x = datetime, y = air_pressure/1000), size = 0.2) +
+  scale_y_continuous(limits = c(93, 98), expand = c(0,0))+
+  ylab(expression("Pressure (kPa)" ))
 
-p2 = basePlot + 
+p2 = basePlotwind + 
   geom_col(aes(x = datetime, y = wind_speed), col = 'lightblue4', size = 0.2)+
-  ylab(expression(paste("Wind speed (m",s^-1,")")))
+  ylab(expression(atop("Wind speed", paste("( m ", s^-1,")"))))
+  # ylab(expression(paste("Wind speed (m",s^-1,")")))
 
-p4 = basePlot + 
-  geom_line(aes(x = datetime, y = air_pressure/1000))+
-  ylab(expression(paste("Air Pressure (kPa)")))
 
 p3 = basePlotCH4 + 
   geom_hline(aes(yintercept = 0), linetype = 2, size = 0.2) +
   geom_point(aes(x = datetime, y = ch4_flux*1000), fill = 'gray', size = 0.5, alpha = 0.7, shape = 21, stroke = 0.1)+
   geom_point(data = TBch4mean, aes(x = datetime, y = mean*1000), fill = 'red4', size = 1, shape = 21, stroke = 0.1)+
-  ylab(expression(paste("C", H[4], " flux (", n,"mol ", m^-2, s^-1,")")))
+  ylab(expression(atop(paste("C", H[4], " flux"), paste("(nmol ", m^-2, s^-1,")"))))
+  # ylab(expression(paste("C", H[4], " flux (", n,"mol ", m^-2, s^-1,")")))
 
 p8 = basePlotCO2 + 
   geom_hline(aes(yintercept = 0), linetype = 2, size = 0.2) +
   geom_point(aes(x = datetime, y = co2_flux), fill = 'gray', size = 0.5, alpha = 0.7, shape = 21, stroke = 0.1)+
   geom_point(data = TBco2mean, aes(x = datetime, y = mean), fill = 'green4', size = 1, shape = 21, stroke = 0.1)+
-  ylab(expression(paste("C", O[2], " flux (", µ,"mol ", m^-2, s^-1,")")))+
+  ylab(expression(atop(paste("C", O[2], " flux"), paste("(",µ,"mol ", m^-2, s^-1,")")))) +
+  # ylab(expression(paste("C", O[2], " flux (", µ,"mol ", m^-2, s^-1,")")))+
   scale_y_continuous(limits = c(-5, 5), breaks = seq(-5, 5, 2))
 
 p1/p10/p2/p3/p8 + plot_annotation(tag_levels = "A")
@@ -144,17 +148,9 @@ ggsave('figures/AG_flux_test_total.pdf', width = 6.5, height = 5, units = 'in', 
 
 # Baseplot for plotting spring
 
-tb = read_csv('data/Data/QAQCFlux.csv') %>% 
-  mutate(datetime = ymd_hms(paste(date,time))) %>% 
-  select(datetime, airtemp, wind_speed, co2_flux, ch4_flux, sonic_temperature, air_pressure) %>% 
-  right_join(dateseq) %>% 
-  left_join(min) %>%
-  left_join(pressure)%>%
-  arrange(datetime)
-
 pulseTB<- tb%>%
   filter(datetime > '2020-04-23 12:00:00' & datetime < '2020-05-14 12:00:00')
-basePlot <- ggplot(tb) +
+basePlotSpring <- ggplot(tb) +
   geom_rect(data = tb[1,], aes(xmin =  as.POSIXct(-Inf, origin="1970-01-01"),
                                xmax = as.POSIXct('2020-04-25 12:00:00'), 
                                ymin = -Inf, ymax = Inf), fill = 'grey90', alpha = 0.7) +
@@ -164,29 +160,33 @@ basePlot <- ggplot(tb) +
   theme_bw(base_size = 8) +
   theme(axis.title.x = element_blank(), axis.title.y = element_text(hjust = 0.5))
 
-p1 = basePlot + 
+p1 = basePlotSpring + 
   geom_ribbon(data = min, aes(x = datetime, ymax = TMAX, ymin = TMIN), fill = 'lightblue3', alpha = 0.8) +
   geom_line(aes(x = datetime, y = sonic_temperature-273.15), size = 0.2) +
   geom_line(data = tb1.hour, aes(x = date_time_UTC, y = tempC_93_cm), size = 0.2, col = 'blue1') + #
   geom_line(data = tb2.hour, aes(x = date_time_UTC, y = temp_minidot_c), size = 0.2, col = 'blue1') +
   scale_y_continuous(limits = c(-20, 23), expand = c(0,0))+
-  ylab(expression("Temperature\n"( degree*C)))
+  ylab(expression("Temperature "( degree*C)))
 
-p10<-basePlot + 
-  geom_ribbon(data = pressure, aes(x = datetime, ymax = Max.Pressure, ymin = Min.Pressure), fill = 'goldenrod', alpha = 0.8) +
-  geom_line(aes(x = datetime, y = air_pressure/3386), size = 0.2) +
-  scale_y_continuous(limits = c(27.5, 29), expand = c(0,0))+
-  ylab(expression("Pressure \n (Hg)" ))
+p10<-basePlotSpring + 
+  geom_ribbon(data = pressure, aes(x = datetime, ymax = Max.Pressure*3.386, ymin = Min.Pressure*3.386), fill = 'goldenrod', alpha = 0.8) +
+  geom_line(aes(x = datetime, y = air_pressure/1000), size = 0.2) +
+  scale_y_continuous(limits = c(93, 98), expand = c(0,0))+
+  ylab(expression("Pressure (kPa)" ))
 
-p2 = basePlot + 
+p2 = basePlotSpring + 
   geom_col(aes(x = datetime, y = wind_speed), col = 'lightblue4', size = 0.1)+
-  ylab(expression(paste("Wind speed \n (m",s^-1,")")))
+  ylab(expression(atop("Wind speed", paste("( m ", s^-1,")"))))+
+  #ylab(expression(paste("Wind speed \n (m",s^-1,")")))+
+  ylim(0, 2)
 
-p3 = basePlot + 
+p3 = basePlotSpring + 
   geom_hline(aes(yintercept = 0), linetype = 2, size = 0.2) +
   geom_point(aes(x = datetime, y = ch4_flux*1000), fill = 'red4', size = 1, alpha = 0.7, shape = 21, stroke = 0.1)+
   geom_point(data = pulseTB, aes(x = datetime, y = ch4_flux *1000), fill = "gold", size = 1, alpha = 0.7, shape = 21, stroke = 0.1)+
-  ylab(expression(paste("C", H[4], " flux \n (", n,"mol ", m^-2, s^-1,")")))
+  ylim(-30, 50)+
+  ylab(expression(atop(paste("C", H[4], " flux"), paste("(nmol ", m^-2, s^-1,")"))))
+  #ylab(expression(paste("C", H[4], " flux \n (", n,"mol ", m^-2, s^-1,")")))
 
 
 p4 = ggplot(tb) +
@@ -197,14 +197,14 @@ p4 = ggplot(tb) +
   theme_bw(base_size = 8) +
   scale_x_datetime(limits = c(as.POSIXct('2020-09-28 12:00:00'), as.POSIXct('2020-10-28 12:00:00'))) +
   scale_y_continuous(limits = c(-20, 23), expand = c(0,0)) +
-  ylab(expression("Temperature \n" ( degree*C)))+
+  ylab(expression("Temperature " ( degree*C)))+
   theme(axis.title.x = element_blank())
 
 p11 = ggplot(tb) +
-  geom_ribbon(data = pressure, aes(x = datetime, ymax = Max.Pressure, ymin = Min.Pressure), fill = 'goldenrod', alpha = 0.8) +
-  geom_line(aes(x = datetime, y = air_pressure/3386), size = 0.2) +
-  scale_y_continuous(limits = c(27.5, 29), expand = c(0,0))+
-  ylab(expression("Pressure \n (Hg)" ))+
+  geom_ribbon(data = pressure, aes(x = datetime, ymax = Max.Pressure*3.386, ymin = Min.Pressure*3.386), fill = 'goldenrod', alpha = 0.8) +
+  geom_line(aes(x = datetime, y = air_pressure/1000), size = 0.2) +
+  scale_y_continuous(limits = c(93, 98), expand = c(0,0))+
+  ylab(expression("Pressure (kPa)" ))+
   theme_bw(base_size = 8) +
   scale_x_datetime(limits = c(as.POSIXct('2020-09-28 12:00:00'), as.POSIXct('2020-10-28 12:00:00'))) +
   theme(axis.title.x = element_blank())
@@ -213,7 +213,8 @@ p5 = ggplot(tb) +
   geom_col(aes(x = datetime, y = wind_speed), col = 'lightblue4', size = 0.1) +
   theme_bw(base_size = 8) +
   scale_x_datetime(limits = c(as.POSIXct('2020-09-28 12:00:00'), as.POSIXct('2020-10-28 12:00:00'))) +
-  ylab(expression(paste("Wind speed \n (m",s^-1,")")))+
+  ylab(expression(atop("Wind speed", paste("( m ", s^-1,")"))))+
+  ylim(0, 2)+
   theme(axis.title.x = element_blank())
 
 p6 = ggplot(tb) +
@@ -221,7 +222,8 @@ p6 = ggplot(tb) +
   geom_point(aes(x = datetime, y = ch4_flux*1000), fill = 'red4', size = 1, alpha = 0.7, shape = 21, stroke = 0.1) +
   theme_bw(base_size = 8) +
   scale_x_datetime(limits = c(as.POSIXct('2020-09-28 12:00:00'), as.POSIXct('2020-10-28 12:00:00'))) +
-  ylab(expression(paste("C", H[4], " flux \n (", n,"mol ", m^-2, s^-1,")")))+
+  ylab(expression(atop(paste("C", H[4], " flux"), paste("(nmol ", m^-2, s^-1,")"))))+
+  ylim(-30, 50)+
   theme(axis.title.x = element_blank())
 
 layout <- "
